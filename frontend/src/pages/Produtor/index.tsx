@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   Plus, 
@@ -151,6 +151,27 @@ export function Producer() {
         return 'Saudável'
     }
   }
+
+  useEffect(() => {
+    async function carregarFazendas() {
+      try {
+        const res = await fetch('http://localhost:5000/area-produtor/fazendas', {
+          method: 'GET',
+          credentials: 'include'  // mantém a sessão do login
+        })
+        const data = await res.json()
+        if (data.status === 'success') {
+          setFarms(data.fazendas)
+        } else {
+          console.error(data.message)
+        }
+      } catch (error) {
+        console.error('Erro ao buscar fazendas:', error)
+      }
+    }
+
+    carregarFazendas()
+  }, [])
 
   return (
     <>

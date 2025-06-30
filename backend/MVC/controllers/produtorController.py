@@ -46,3 +46,36 @@ def criar_fazenda():
         return jsonify({'status': 'error', 'message': 'CCIR já cadastrado.'}), 409
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Erro ao criar fazenda: {e}'}), 500
+
+@produtor_bp.route('/area-produtor/fazendas', methods=['GET'])
+def listar_fazendas():
+    if 'cpf' not in session:
+        return jsonify({'status': 'error', 'message': 'Usuário não autenticado.'}), 401
+
+    cpf_produtor = session['cpf']
+    try:
+        sql = """
+            SELECT id, ccir, nome, latitude, longitude, ext_territorial
+            FROM fazendas
+            WHERE cpf_produtor = %s
+        """
+        fazenda_dao.cursor.execute(sql, (cpf_produtor,))
+        resultados = fazenda_dao.cursor.fetchall()
+
+        fazendas = []
+        for row in resultados:
+            fazendas.append({
+                'id': str(row[0]),
+                'ccm': row[1],
+                'name': row[2],
+                'latitude': str(row[3]),
+                'longitude': str(row[4]),
+                'area': float(row[5]),
+                'status': 'healthy',  # você pode melhorar isso depois
+                'lastInspection': ''  # idem
+            })
+
+        return jsonify({'status': 'success', 'fazendas': fazendas}), 200
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Erro ao listar fazendas: {e}'}), 500
