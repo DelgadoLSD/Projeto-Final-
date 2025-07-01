@@ -11,7 +11,7 @@ export const Container = styled.div`
 `;
 
 export const MaxWidthWrapper = styled.div`
-  max-width: 80rem; /* max-w-7xl (ajuste conforme necessário, 7xl geralmente é 80rem) */
+  max-width: 80rem; /* max-w-7xl */
   margin: 0 auto; /* mx-auto */
 `;
 
@@ -43,13 +43,16 @@ export const BackButton = styled.button`
   align-items: center;
   gap: 0.5rem; /* gap-2 */
   padding: 0.5rem 1rem; /* px-4 py-2 */
-  background-color: #4b5563; /* bg-gray-600 */
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: #ffffff; /* text-white */
+  border: none;
   border-radius: 0.5rem; /* rounded-lg */
-  transition: background-color 0.2s ease-in-out; /* hover:bg-gray-700 transition-colors */
+  transition: all 0.2s ease-in-out;
 
   &:hover {
-    background-color: #374151; /* hover:bg-gray-700 */
+    background: linear-gradient(135deg, #c82333 0%, #b21f2c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -76,26 +79,21 @@ export const DownloadButton = styled.button`
   background-color: #10b981; /* bg-green-600 */
   color: #ffffff; /* text-white */
   border-radius: 0.5rem; /* rounded-lg */
-  transition: background-color 0.2s ease-in-out; /* hover:bg-green-700 transition-colors */
+  border: none;
+  transition: background-color 0.2s ease-in-out; 
 
   &:hover {
     background-color: #059669; /* hover:bg-green-700 */
   }
 `;
 
+// AJUSTADO: De Grid para Flexbox para centralizar os itens
 export const QuickStatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Centraliza os cartões horizontalmente */
   gap: 1.5rem; /* gap-6 */
   margin-bottom: 1.5rem; /* mb-6 */
-
-  @media (min-width: 768px) { /* md:grid-cols-2 */
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 1024px) { /* lg:grid-cols-4 */
-    grid-template-columns: repeat(4, 1fr);
-  }
 `;
 
 export const StatCard = styled.div`
@@ -106,6 +104,15 @@ export const StatCard = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-grow: 1; /* Permite que os cards cresçam */
+  
+  @media (min-width: 768px) {
+    max-width: calc(50% - 0.75rem); /* Para 2 colunas */
+  }
+
+  @media (min-width: 1024px) {
+    max-width: calc(25% - 1.125rem); /* Para 4 colunas, garantindo o espaçamento */
+  }
 `;
 
 export const StatContent = styled.div`
@@ -124,7 +131,6 @@ export const StatContent = styled.div`
   }
 `;
 
-// Estilos específicos para texto e ícones de status/tendência dentro dos cards de estatísticas
 export const AnomalyStatValue = styled(StatContent)`
   p:nth-child(2) {
     color: #ea580c; /* text-orange-600 */
@@ -142,16 +148,18 @@ export const StatusIndicator = styled.div`
   align-items: center;
   gap: 0.5rem; /* gap-2 */
   margin-top: 0.5rem; /* mt-2 */
-
+  
   span {
     font-weight: 600; /* font-semibold */
+    color: #111827;
   }
 `;
 
-export const FarmInfoSection = styled(HeaderSection)` /* Reutiliza estilos base do HeaderSection */
-  padding: 1.5rem; /* p-6 */
-  margin-bottom: 1.5rem; /* mb-6 */
-  flex-direction: column; /* Sempre coluna para o grid interno */
+export const FarmInfoSection = styled(HeaderSection)`
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-direction: column; 
+  align-items: flex-start; /* Alinha o título à esquerda */
 `;
 
 export const FarmInfoTitle = styled.h2`
@@ -159,48 +167,50 @@ export const FarmInfoTitle = styled.h2`
   font-weight: bold;
   color: #111827; /* text-gray-900 */
   margin-bottom: 1rem; /* mb-4 */
+  width: 100%; /* Garante que o título ocupe a largura toda */
+  text-align: center; /* Centraliza o título */
+
+  @media (min-width: 768px) {
+    text-align: left; /* Alinha à esquerda em telas maiores */
+  }
 `;
 
+// AJUSTADO: De Grid para Flexbox para centralizar os itens
 export const FarmInfoGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Centraliza os itens de informação */
   gap: 1.5rem; /* gap-6 */
-
-  @media (min-width: 768px) { /* md:grid-cols-2 */
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 1024px) { /* lg:grid-cols-4 */
-    grid-template-columns: repeat(4, 1fr);
-  }
+  width: 100%; /* Ocupa toda a largura da seção */
 `;
 
 export const FarmInfoItem = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem; /* gap-3 */
-
+  
   p:first-child {
     font-size: 0.875rem; /* text-sm */
     color: #4b5563; /* text-gray-600 */
   }
   p:last-child {
     font-weight: 600; /* font-semibold */
+    color: #111827; /* text-gray-900 */
   }
 `;
 
-export const TabsSection = styled(HeaderSection)` /* Reutiliza estilos base */
-  padding: 0; /* Remove padding padrão do HeaderSection para borda inferior */
-  margin-bottom: 1.5rem; /* mb-6 */
+export const TabsSection = styled(HeaderSection)`
+  padding: 0;
+  margin-bottom: 1.5rem;
   flex-direction: column;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Ajuste de sombra */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 `;
 
 export const TabNav = styled.nav`
   display: flex;
+  justify-content: center; /* Centraliza a(s) aba(s) */
   border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
-  padding-left: 1.5rem; /* px-6 */
-  padding-right: 1.5rem; /* px-6 */
+  padding: 0 1.5rem; 
   gap: 2rem; /* space-x-8 */
 `;
 
@@ -213,26 +223,22 @@ export const TabButton = styled.button<TabButtonProps>`
   align-items: center;
   gap: 0.5rem; /* gap-2 */
   padding: 1rem 0.25rem; /* py-4 px-1 */
-  border-bottom: 2px solid; /* border-b-2 */
+  border-bottom: 2px solid; 
   font-weight: 500; /* font-medium */
   font-size: 0.875rem; /* text-sm */
   cursor: pointer;
   background: none;
-  border-color: transparent; /* Padrão */
+  border: none;
+  border-bottom: 2px solid;
+  border-color: transparent;
 
-  ${props =>
-    props.$isActive
-      ? `
-    border-color: #3b82f6; /* border-blue-500 */
-    color: #2563eb; /* text-blue-600 */
-  `
-      : `
-    color: #6b7280; /* text-gray-500 */
-    &:hover {
-      color: #374151; /* hover:text-gray-700 */
-      border-color: #d1d5db; /* hover:border-gray-300 */
-    }
-  `}
+  color: ${props => (props.$isActive ? '#2563eb' : '#6b7280')};
+  border-color: ${props => (props.$isActive ? '#3b82f6' : 'transparent')};
+
+  &:hover {
+    color: ${props => (props.$isActive ? '#2563eb' : '#374151')};
+    border-color: ${props => (props.$isActive ? '#3b82f6' : '#d1d5db')};
+  }
 `;
 
 export const TabContent = styled.div`
@@ -240,26 +246,27 @@ export const TabContent = styled.div`
 `;
 
 export const ChartContainer = styled.div`
-  margin-bottom: 1.5rem; /* Ajuste para espaçamento entre gráficos se necessário */
-  padding-bottom: 1rem; /* Adiciona um pouco de padding para separar do próximo conteúdo */
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
 
   h3 {
     font-size: 1.125rem; /* text-lg */
     font-weight: 600; /* font-semibold */
     color: #111827; /* text-gray-900 */
     margin-bottom: 1rem; /* mb-4 */
+    text-align: center; /* Centraliza o título do gráfico */
   }
 `;
 
+// AJUSTADO: De Grid para Flexbox para centralizar o conteúdo
 export const TwoColumnGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  justify-content: center; /* Centraliza o gráfico */
+  flex-wrap: wrap;
   gap: 1.5rem; /* gap-6 */
-
-  @media (min-width: 1024px) { /* lg:grid-cols-2 */
-    grid-template-columns: repeat(2, 1fr);
-  }
 `;
+
+/* O restante do arquivo styled.ts permanece igual */
 
 export const ThreeColumnGrid = styled.div`
   display: grid;
