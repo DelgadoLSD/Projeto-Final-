@@ -22,7 +22,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Container, MaxWidthWrapper, HeaderSection, HeaderTitleContainer, BackButton, ReportTitle, ReportSubtitle, DownloadButton, 
   QuickStatsGrid, StatCard, StatContent, AnomalyStatValue, HealthStatValue, StatusIndicator, FarmInfoSection, FarmInfoTitle, FarmInfoGrid, FarmInfoItem,
   TabsSection, TabNav, TabButton, TabContent, TwoColumnGrid, ChartContainer, ThreeColumnGrid, AnomalyTypeCard, AnomalyTypeColorIndicator,
-  RecommendationCard, RecommendationHeader, PriorityTag, RecommendationDescription, ActionRecommendedBox
+  RecommendationCard, RecommendationHeader, PriorityTag, RecommendationDescription, ActionRecommendedBox, StyledIcon
  } from './styled'
 
 
@@ -143,7 +143,7 @@ export default function FarmReport() {
   }, [farmId])
 
   const handleGoBack = () => {
-    navigate(-1) // Volta para a página anterior
+    navigate('/area-produtor') // Volta para a página anterior
   }
 
   const handleDownloadReport = () => {
@@ -153,13 +153,13 @@ export default function FarmReport() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy':
-        return <CheckCircle className="w-5 h-5 text-green-500" />
+        return <StyledIcon as={CheckCircle} iconColor="#00FF00" />
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />
+        return <StyledIcon as={AlertTriangle} iconColor="#f59e0b" />
       case 'critical':
-        return <XCircle className="w-5 h-5 text-red-500" />
+        return <StyledIcon as={XCircle} iconColor="#FF0000" />
       default:
-        return <CheckCircle className="w-5 h-5 text-green-500" />
+        return <StyledIcon as={CheckCircle} iconColor="#00FF00" />
     }
   }
 
@@ -242,7 +242,7 @@ export default function FarmReport() {
               <p>Imagens Analisadas</p>
               <p>{farm.totalImages}</p>
             </StatContent>
-            <Camera className="w-10 h-10 text-blue-500" />
+            <StyledIcon as={Camera} iconColor="#000" />
           </StatCard>
 
           <StatCard>
@@ -251,7 +251,7 @@ export default function FarmReport() {
               <p>{farm.anomalousImages}</p>
               <p>{anomalyPercentage}% do total</p>
             </AnomalyStatValue>
-            <AlertTriangle className="w-10 h-10 text-orange-500" />
+            <StyledIcon as={AlertTriangle} iconColor="#f59e0b" /> {/* Cor laranja (orange-500) */}
           </StatCard>
 
           <StatCard>
@@ -262,7 +262,7 @@ export default function FarmReport() {
                 <span>{getStatusText(farm.status)}</span>
               </StatusIndicator>
             </StatContent>
-            <Activity className="w-10 h-10 text-purple-500" />
+            <StyledIcon as={Activity} iconColor="#000" />
           </StatCard>
         </QuickStatsGrid>
 

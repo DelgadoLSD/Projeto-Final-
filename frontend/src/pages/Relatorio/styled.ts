@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { AlertTriangle, Camera, Activity, CheckCircle, XCircle } from 'lucide-react'; 
 
 export const Container = styled.div`
   min-height: 100vh;
@@ -8,6 +9,12 @@ export const Container = styled.div`
   @media (max-width: 768px) { /* md:p-4 */
     padding: 1rem;
   }
+`;
+
+export const StyledIcon = styled.svg<{ iconColor?: string }>`
+  width: 2rem;  /* 40px, equivalente a w-10 */
+  height: 2rem; /* 40px, equivalente a h-10 */
+  color: ${props => props.iconColor || '#6b7280'}; /* Usa a cor da prop ou uma cor padrão (cinza) */
 `;
 
 export const MaxWidthWrapper = styled.div`
