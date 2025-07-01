@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   ArrowLeft, 
   Download, 
@@ -22,7 +23,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Container, MaxWidthWrapper, HeaderSection, HeaderTitleContainer, BackButton, ReportTitle, ReportSubtitle, DownloadButton, 
   QuickStatsGrid, StatCard, StatContent, AnomalyStatValue, HealthStatValue, StatusIndicator, FarmInfoSection, FarmInfoTitle, FarmInfoGrid, FarmInfoItem,
   TabsSection, TabNav, TabButton, TabContent, TwoColumnGrid, ChartContainer, ThreeColumnGrid, AnomalyTypeCard, AnomalyTypeColorIndicator,
-  RecommendationCard, RecommendationHeader, PriorityTag, RecommendationDescription, ActionRecommendedBox
+  RecommendationCard, RecommendationHeader, PriorityTag, RecommendationDescription, ActionRecommendedBox, StyledIcon
  } from './styled'
 
 
@@ -71,7 +72,7 @@ const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6']
 
 export default function FarmReport() {
   const [farmId] = useState('1') // Mock farmId
-  
+  const navigate = useNavigate()
   const [farm, setFarm] = useState<Farm | null>(null)
   const [reportData, setReportData] = useState<ReportData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -103,10 +104,8 @@ export default function FarmReport() {
       { week: 'Sem 5', anomalias: 0, normal: 30, total: 30 }
     ],
     anomalyTypes: [
-      { name: 'Pragas', value: 45, color: '#ef4444' },
-      { name: 'Doenças', value: 25, color: '#f97316' },
-      { name: 'Deficiência Nutricional', value: 20, color: '#eab308' },
-      { name: 'Estresse Hídrico', value: 10, color: '#22c55e' }
+      { name: 'Anômala', value: 45, color: '#ef4444' },
+      { name: 'Normal', value: 10, color: '#22c55e' }
     ],
     monthlyTrend: [
       { month: 'Jan', anomalias: 15, eficiencia: 85 },
@@ -145,7 +144,7 @@ export default function FarmReport() {
   }, [farmId])
 
   const handleGoBack = () => {
-    alert('Voltar para página anterior')
+    navigate('/area-produtor') // Volta para a página anterior
   }
 
   const handleDownloadReport = () => {
@@ -155,13 +154,13 @@ export default function FarmReport() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy':
-        return <CheckCircle className="w-5 h-5 text-green-500" />
+        return <StyledIcon as={CheckCircle} iconColor="#00FF00" />
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />
+        return <StyledIcon as={AlertTriangle} iconColor="#f59e0b" />
       case 'critical':
-        return <XCircle className="w-5 h-5 text-red-500" />
+        return <StyledIcon as={XCircle} iconColor="#FF0000" />
       default:
-        return <CheckCircle className="w-5 h-5 text-green-500" />
+        return <StyledIcon as={CheckCircle} iconColor="#00FF00" />
     }
   }
 
@@ -244,7 +243,7 @@ export default function FarmReport() {
               <p>Imagens Analisadas</p>
               <p>{farm.totalImages}</p>
             </StatContent>
-            <Camera className="w-10 h-10 text-blue-500" />
+            <StyledIcon as={Camera} iconColor="#000" />
           </StatCard>
 
           <StatCard>
@@ -253,15 +252,7 @@ export default function FarmReport() {
               <p>{farm.anomalousImages}</p>
               <p>{anomalyPercentage}% do total</p>
             </AnomalyStatValue>
-            <AlertTriangle className="w-10 h-10 text-orange-500" />
-          </StatCard>
-
-          <StatCard>
-            <HealthStatValue> {/* Usa o styled component específico para saúde */}
-              <p>Índice de Saúde</p>
-              <p>{healthScore}%</p>
-            </HealthStatValue>
-            <Leaf className="w-10 h-10 text-green-500" />
+            <StyledIcon as={AlertTriangle} iconColor="#f59e0b" /> {/* Cor laranja (orange-500) */}
           </StatCard>
 
           <StatCard>
@@ -272,7 +263,7 @@ export default function FarmReport() {
                 <span>{getStatusText(farm.status)}</span>
               </StatusIndicator>
             </StatContent>
-            <Activity className="w-10 h-10 text-purple-500" />
+            <StyledIcon as={Activity} iconColor="#000" />
           </StatCard>
         </QuickStatsGrid>
 
@@ -281,7 +272,7 @@ export default function FarmReport() {
           <FarmInfoTitle>Informações da Propriedade</FarmInfoTitle>
           <FarmInfoGrid>
             <FarmInfoItem>
-              <MapPin className="w-5 h-5 text-blue-500" />
+              <MapPin className="w-5 h-5 text-blue-500 " />
               <div>
                 <p>Coordenadas</p>
                 <p>{farm.latitude}, {farm.longitude}</p>
@@ -294,20 +285,6 @@ export default function FarmReport() {
                 <p>{farm.area} hectares</p>
               </div>
             </FarmInfoItem>
-            <FarmInfoItem>
-              <Calendar className="w-5 h-5 text-blue-500" />
-              <div>
-                <p>Última Inspeção</p>
-                <p>{new Date(farm.lastInspection).toLocaleDateString('pt-BR')}</p>
-              </div>
-            </FarmInfoItem>
-            <FarmInfoItem>
-              <FileText className="w-5 h-5 text-blue-500" />
-              <div>
-                <p>CCM</p>
-                <p>{farm.ccm}</p>
-              </div>
-            </FarmInfoItem>
           </FarmInfoGrid>
         </FarmInfoSection>
 
@@ -316,8 +293,6 @@ export default function FarmReport() {
           <TabNav>
             {[
               { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
-              { id: 'analysis', label: 'Análise Detalhada', icon: PieChart },
-              { id: 'recommendations', label: 'Recomendações', icon: Zap }
             ].map((tab) => (
               <TabButton
                 key={tab.id}
@@ -334,25 +309,11 @@ export default function FarmReport() {
             {activeTab === 'overview' && (
               <div className="space-y-6"> {/* Manter space-y-6 ou criar um styled */}
                 <TwoColumnGrid> {/* Substitui grid grid-cols-1 lg:grid-cols-2 gap-6 */}
-                  <ChartContainer>
-                    <h3>Análise Semanal</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={reportData.weeklyAnalysis}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="week" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="normal" stackId="a" fill="#22c55e" name="Normal" />
-                        <Bar dataKey="anomalias" stackId="a" fill="#ef4444" name="Anomalias" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
 
                   <ChartContainer>
                     <h3>Distribuição de Anomalias</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <RechartsPieChart>
+                    <ResponsiveContainer width={400} height={400}>
+                      <RechartsPieChart margin={{ top: 20, right: 50, bottom: 20, left: 50 }}>
                         <Pie
                           data={reportData.anomalyTypes}
                           cx="50%"
@@ -371,67 +332,6 @@ export default function FarmReport() {
                     </ResponsiveContainer>
                   </ChartContainer>
                 </TwoColumnGrid>
-              </div>
-            )}
-
-            {activeTab === 'analysis' && (
-              <div className="space-y-6"> {/* Manter space-y-6 ou criar um styled */}
-                <ChartContainer>
-                  <h3>Tendência Mensal</h3>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={reportData.monthlyTrend}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="anomalias" fill="#ef4444" name="Anomalias" />
-                      <Line
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="eficiencia"
-                        stroke="#22c55e"
-                        strokeWidth={3}
-                        name="Eficiência (%)"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-
-                <ThreeColumnGrid> {/* Substitui grid grid-cols-1 md:grid-cols-3 gap-6 */}
-                  {reportData.anomalyTypes.map((type, index) => (
-                    <AnomalyTypeCard key={index}> {/* Substitui div */}
-                      <div className="flex items-center gap-3 mb-2">
-                        <AnomalyTypeColorIndicator $color={type.color} />
-                        <h4>{type.name}</h4>
-                      </div>
-                      <p>{type.value}%</p>
-                      <p>do total de anomalias</p>
-                    </AnomalyTypeCard>
-                  ))}
-                </ThreeColumnGrid>
-              </div>
-            )}
-
-            {activeTab === 'recommendations' && (
-              <div className="space-y-4"> {/* Manter space-y-4 ou criar um styled */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recomendações de Ação</h3>
-                {reportData.recommendations.map((rec, index) => (
-                  <RecommendationCard key={index}> {/* Substitui div */}
-                    <RecommendationHeader> {/* Substitui div */}
-                      <h4>{rec.title}</h4>
-                      <PriorityTag $priorityColor={rec.priority}> {/* Propriedade para estilo */}
-                        Prioridade {getPriorityText(rec.priority)}
-                      </PriorityTag>
-                    </RecommendationHeader>
-                    <RecommendationDescription>{rec.description}</RecommendationDescription>
-                    <ActionRecommendedBox> {/* Substitui div */}
-                      <p>Ação Recomendada:</p>
-                      <p>{rec.action}</p>
-                    </ActionRecommendedBox>
-                  </RecommendationCard>
-                ))}
               </div>
             )}
           </TabContent>

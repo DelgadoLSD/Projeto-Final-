@@ -1,13 +1,16 @@
+# MVC/controllers/mosaiqueiroController.py
+
 from flask import Blueprint, session, request, jsonify
 from mysql.connector import IntegrityError
 from MVC.model.usuario_fazenda_dao import UsuarioFazendaDAO
-from MVC.model.fazenda_dao import FazendaDAO # Importar o FazendaDAO
+from MVC.model.fazenda_dao import FazendaDAO
 
 mosaiqueiro_bp = Blueprint('mosaiqueiro', __name__)
 uf_dao = UsuarioFazendaDAO(password='senha123')
-fazenda_dao = FazendaDAO(password='senha123') # Instanciar o FazendaDAO
+fazenda_dao = FazendaDAO(password='senha123')
 
-@mosaiqueiro_bp.route('/area-mosaiqueiro/fazendas', methods=['GET'])
+# ROTA MODIFICADA: '/area-mosaiqueiro/fazendas' virou '/fazendas'
+@mosaiqueiro_bp.route('/fazendas', methods=['GET'])
 def listar_fazendas_por_ccir():
     if 'cpf' not in session:
         return jsonify({'status':'error','message':'Usuário não autenticado.'}), 401
@@ -19,7 +22,8 @@ def listar_fazendas_por_ccir():
     fazendas = uf_dao.buscar_fazendas_por_ccir(ccir)
     return jsonify({'status':'success','fazendas':fazendas})
 
-@mosaiqueiro_bp.route('/area-mosaiqueiro/fazendas', methods=['POST'])
+# ROTA MODIFICADA: '/area-mosaiqueiro/fazendas' virou '/fazendas'
+@mosaiqueiro_bp.route('/fazendas', methods=['POST'])
 def associar_fazenda():
     if 'cpf' not in session:
         return jsonify({'status':'error','message':'Usuário não autenticado.'}), 401
@@ -36,34 +40,31 @@ def associar_fazenda():
         return jsonify({'status':'error','message':'Já associado a essa fazenda.'}), 409
     except Exception as e:
         return jsonify({'status':'error','message':f'Erro ao associar fazenda: {e}'}), 500
-    
-@mosaiqueiro_bp.route('/area-mosaiqueiro/fazendas/associadas', methods=['GET'])
+
+# ROTA MODIFICADA: '/area-mosaiqueiro/fazendas/associadas' virou '/fazendas/associadas'
+@mosaiqueiro_bp.route('/fazendas/associadas', methods=['GET'])
 def fazendas_associadas():
     if 'cpf' not in session:
         return jsonify({'status':'error','message':'Usuário não autenticado'}), 401
     fazendas = uf_dao.buscar_fazendas_do_usuario(session['cpf'])
     return jsonify({'status':'success','fazendas':fazendas})
 
-# ROTA ESPECÍFICA DO MOSAIQUEIRO PARA MAPA DE CALOR (FUNCIONAVA)
-@mosaiqueiro_bp.route('/area-mosaiqueiro/mapa-calor/<int:farm_id>', methods=['GET'])
+# ROTA MODIFICADA: '/area-mosaiqueiro/mapa-calor/...' virou '/mapa-calor/...'
+@mosaiqueiro_bp.route('/mapa-calor/<int:farm_id>', methods=['GET'])
 def get_mapa_calor_data(farm_id):
     if 'cpf' not in session:
         return jsonify({'status': 'error', 'message': 'Usuário não autenticado.'}), 401
 
-    # Verificar se o mosaiqueiro tem acesso a esta fazenda (opcional, mas recomendado para segurança)
     fazendas_associadas_do_usuario = uf_dao.buscar_fazendas_do_usuario(session['cpf'])
-    
     fazenda_ids_permitidos = {f['id'] for f in fazendas_associadas_do_usuario}
 
     if farm_id not in fazenda_ids_permitidos:
-        return jsonify({'status': 'error', 'message': 'Acesso negado: Fazenda não encontrada ou não associada ao seu usuário.'}), 403 # 403 Forbidden
+        return jsonify({'status': 'error', 'message': 'Acesso negado: Fazenda não encontrada ou não associada ao seu usuário.'}), 403
 
-    # Buscar dados da fazenda
     fazenda_data = fazenda_dao.buscar_fazenda_por_id(farm_id)
     if not fazenda_data:
         return jsonify({'status': 'error', 'message': 'Fazenda não encontrada.'}), 404
 
-    # Buscar dados das imagens e resultados
     imagens_data = fazenda_dao.buscar_imagens_e_resultados_por_fazenda(farm_id)
 
     response_fazenda = {
