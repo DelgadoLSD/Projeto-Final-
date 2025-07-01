@@ -90,7 +90,7 @@ export function HeatMap() {
     
     const [farm, setFarm] = useState<Farm | null>(null)
     const [images, setImages] = useState<ImageData[]>([])
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(true) // CORREÇÃO AQUI
     const [error, setError] = useState<string | null>(null)
 
     // Função auxiliar para montar a URL da API dinamicamente
@@ -149,6 +149,92 @@ export function HeatMap() {
         }
     }, [farmId, navigate, location.search])
 
+    // Função para criar interpolação com gradiente vermelho→amarelo para anomalias
+    const createAnomalyHeatmap = (map: any, anomalousImages: ImageData[]) => {
+        anomalousImages.forEach(img => {
+            // Camadas com gradiente vermelho no centro → amarelo nas bordas
+            const anomalyLayers = [
+                { radius: 45, opacity: 0.08, color: '#ffeb3b' }, // Amarelo mais externo
+                { radius: 35, opacity: 0.12, color: '#ffc107' }, // Amarelo-laranja
+                { radius: 28, opacity: 0.18, color: '#ff9800' }, // Laranja
+                { radius: 22, opacity: 0.25, color: '#ff5722' }, // Laranja-vermelho
+                { radius: 16, opacity: 0.32, color: '#f44336' }, // Vermelho
+                { radius: 12, opacity: 0.40, color: '#d32f2f' }, // Vermelho escuro
+                { radius: 8, opacity: 0.50, color: '#b71c1c' }   // Vermelho muito escuro
+            ]
+
+            anomalyLayers.forEach(layer => {
+                window.L.circle([img.lat, img.lng], {
+                    radius: layer.radius,
+                    fillColor: layer.color,
+                    color: 'transparent',
+                    weight: 0,
+                    fillOpacity: layer.opacity
+                }).addTo(map)
+            })
+
+            // Ponto central vermelho
+            window.L.circleMarker([img.lat, img.lng], {
+                radius: 3,
+                fillColor: '#b71c1c',
+                color: '#ffffff',
+                weight: 1,
+                fillOpacity: 1,
+                opacity: 1
+            }).bindPopup(`${img.nome}<br><strong>Anomalia Detectada</strong>`)
+            .addTo(map)
+        })
+    }
+
+    // Função para criar interpolação verde para pontos normais
+    const createNormalHeatmap = (map: any, normalImages: ImageData[]) => {
+        normalImages.forEach(img => {
+            // Camadas verdes irradiando
+            const normalLayers = [
+                { radius: 35, opacity: 0.08, color: '#81c784' }, // Verde claro externo
+                { radius: 28, opacity: 0.12, color: '#66bb6a' }, // Verde claro-médio
+                { radius: 22, opacity: 0.18, color: '#4caf50' }, // Verde médio
+                { radius: 16, opacity: 0.25, color: '#43a047' }, // Verde médio-escuro
+                { radius: 12, opacity: 0.32, color: '#388e3c' }, // Verde escuro
+                { radius: 8, opacity: 0.40, color: '#2e7d32' }   // Verde muito escuro
+            ]
+
+            normalLayers.forEach(layer => {
+                window.L.circle([img.lat, img.lng], {
+                    radius: layer.radius,
+                    fillColor: layer.color,
+                    color: 'transparent',
+                    weight: 0,
+                    fillOpacity: layer.opacity
+                }).addTo(map)
+            })
+
+            // Ponto central verde
+            window.L.circleMarker([img.lat, img.lng], {
+                radius: 4,
+                fillColor: '#2e7d32',
+                color: '#ffffff',
+                weight: 1,
+                fillOpacity: 1,
+                opacity: 1
+            }).bindPopup(`${img.nome}<br><strong>Status: Normal</strong>`)
+            .addTo(map)
+        })
+    }
+
+    // Função principal que combina ambos os efeitos
+    const createCombinedHeatmap = (map: any, anomalousImages: ImageData[], normalImages: ImageData[]) => {
+        // Primeiro renderiza os pontos normais (verdes)
+        if (normalImages.length > 0) {
+            createNormalHeatmap(map, normalImages)
+        }
+        
+        // Depois renderiza as anomalias (vermelho→amarelo) por cima
+        if (anomalousImages.length > 0) {
+            createAnomalyHeatmap(map, anomalousImages)
+        }
+    }
+
     useEffect(() => {
         if (!farm || !mapRef.current || !window.L) return 
 
@@ -179,44 +265,24 @@ export function HeatMap() {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(mapa)
 
+            // Área da fazenda
             window.L.circle([centro.lat, centro.lng], {
                 radius: raio_m,
                 color: 'green',
                 fillColor: 'lightgreen',
-                fillOpacity: 0.2
+                fillOpacity: 0.2,
+                weight: 3
             }).addTo(mapa)
 
             if (images.length > 0) {
-                const heatData = images 
-                    .filter(img => img.anomala)
-                    .map(img => [img.lat, img.lng, 1])
+                // Separar imagens anômalas e normais
+                const anomalousImages = images.filter(img => img.anomala)
+                const normalImages = images.filter(img => !img.anomala)
 
-                if (window.L.heatLayer) {
-                    window.L.heatLayer(heatData, {
-                        radius: 25, 
-                        blur: 15,
-                        maxZoom: 17,
-                        gradient: {
-                            0.3: 'green',
-                            0.5: 'yellow',
-                            0.7: 'orange',
-                            1.0: 'red'
-                        }
-                    }).addTo(mapa)
-                }
+                // Criar efeito de heatmap combinado com interpolação
+                createCombinedHeatmap(mapa, anomalousImages, normalImages)
 
-                images
-                    .filter(img => !img.anomala)
-                    .forEach(img => {
-                        window.L.circleMarker([img.lat, img.lng], {
-                            radius: 6,
-                            fillColor: 'blue',
-                            color: '#000',
-                            weight: 1,
-                            fillOpacity: 0.6
-                        }).bindPopup(`${img.nome}<br><strong>Normal</strong>`)
-                        .addTo(mapa)
-                    })
+                console.log(`Mapa criado com ${anomalousImages.length} anomalias e ${normalImages.length} pontos normais`)
             }
 
             mapInstance.current = mapa
@@ -429,12 +495,27 @@ export function HeatMap() {
                                 <span>Área da Fazenda</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <div style={{ width: '12px' , height: '12px', background: 'red', borderRadius: '50%' }}></div>
-                                <span>Áreas com Anomalias (Heatmap)</span>
+                                <div style={{ 
+                                    width: '12px', 
+                                    height: '12px', 
+                                    background: 'radial-gradient(circle, #b71c1c 0%, #ffeb3b 100%)', 
+                                    borderRadius: '50%',
+                                    position: 'relative',
+                                    border: '1px solid #b71c1c' 
+                                }}>
+                                    {/* Removido o ponto vermelho interno para a legenda de Plantas Anômalas */}
+                                </div>
+                                <span>Plantas Anômalas</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <div style={{ width: '12px', height: '12px', background: 'blue', borderRadius: '50%' }}></div>
-                                <span>Pontos Normais</span>
+                                <div style={{ 
+                                    width: '12px', 
+                                    height: '12px', 
+                                    background: 'radial-gradient(circle, #2e7d32 0%, #81c784 100%)', 
+                                    borderRadius: '50%',
+                                    border: '1px solid #2e7d32' 
+                                }}></div>
+                                <span>Plantas Normais</span>
                             </div>
                         </div>
                     </div>
