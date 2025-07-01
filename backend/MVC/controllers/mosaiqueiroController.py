@@ -35,3 +35,11 @@ def associar_fazenda():
         return jsonify({'status':'error','message':'Já associado a essa fazenda.'}), 409
     except Exception as e:
         return jsonify({'status':'error','message':f'Erro ao associar fazenda: {e}'}), 500
+    
+@mosaiqueiro_bp.route('/area-mosaiqueiro/fazendas/associadas', methods=['GET'])
+def fazendas_associadas():
+    if 'cpf' not in session:
+        return jsonify({'status':'error','message':'Usuário não autenticado'}), 401
+    fazendas = uf_dao.buscar_fazendas_do_usuario(session['cpf'])
+    return jsonify({'status':'success','fazendas':fazendas})
+

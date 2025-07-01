@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   UserPlus, 
@@ -52,6 +52,39 @@ export function Mosaiqueiro() {
   const [formData, setFormData] = useState({
     ccir: '',
   })
+
+  useEffect(() => {
+    const fetchAssociatedFarms = async () => {
+      try {
+        const resp = await fetch('http://localhost:5000/area-mosaiqueiro/fazendas/associadas', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        const json = await resp.json()
+        if (json.status === 'success') {
+          setAssociatedFarms(json.fazendas.map((f: any) => ({
+            id: f.id.toString(),
+            name: f.nome,
+            ccm: f.ccm,
+            latitude: f.latitude.toString(),
+            longitude: f.longitude.toString(),
+            area: parseFloat(f.area),
+            status: 'healthy', // ou ajuste se vier do backend
+            lastInspection: new Date().toISOString().split('T')[0],
+            producerName: '',
+            producerCpf: ''
+          })))
+        } else {
+          console.warn('Erro ao buscar fazendas associadas:', json.message)
+        }
+      } catch (err) {
+        console.error('Erro ao carregar fazendas associadas:', err)
+      }
+    }
+
+    fetchAssociatedFarms()
+  }, [])
+
 
   // Simulação de fazendas disponíveis no sistema
   const mockFarms: Farm[] = [
@@ -111,29 +144,40 @@ export function Mosaiqueiro() {
           credentials: 'include'
         }
       )
+
+      if (!resp.ok) {
+        console.error(`Erro HTTP: ${resp.status}`)
+        alert('Erro ao buscar fazenda')
+        return
+      }
+
       const json = await resp.json()
+      console.log('Resposta do backend:', json)
+
       if (json.status === 'success') {
         setSearchResults(json.fazendas.map((f: any) => ({
-          id:    f.id.toString(),
-          name:  f.nome,
-          ccm:   f.ccm,
-          latitude:  f.latitude.toString(),
-          longitude: f.longitude.toString(),
-          area:      parseFloat(f.area),
+          id:    f.id?.toString() || '',
+          name:  f.nome || 'Sem nome',
+          ccm:   f.ccm || '',
+          latitude:  f.latitude?.toString() || '',
+          longitude: f.longitude?.toString() || '',
+          area:      parseFloat(f.area) || 0,
           status:    'healthy',
           lastInspection: new Date().toISOString().split('T')[0],
-          producerName: ''  // opcional: buscar nome do produtor se quiser
+          producerName: f.produtor_nome || '',
+          producerCpf: f.produtor_cpf || ''
         })))
       } else {
-        alert(json.message)
+        alert(json.message || 'Erro ao buscar fazendas')
       }
     } catch (err) {
-      console.error(err)
-      alert('Erro ao buscar fazenda')
+      console.error('Erro no fetch:', err)
+      alert('Erro de conexão com o servidor')
     } finally {
       setIsLoading(false)
     }
   }
+
 
 
     // antes de tudo, marque a função como async
@@ -250,10 +294,6 @@ export function Mosaiqueiro() {
               {associatedFarms.map(farm => (
                 <FarmCard key={farm.id}>
                   <h3>{farm.name}</h3>
-                  <p style={{ color: '#718096', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
-                    Produtor: {farm.producerName}
-                  </p>
-                  
                   <div className="farm-info">
                     <div className="info-item">
                       <MapPin />
@@ -325,7 +365,7 @@ export function Mosaiqueiro() {
                   >
                     <h3>{farm.name}</h3>
                     <p style={{ color: '#718096', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
-                      Produtor: {farm.producerName} - CPF: {formatCpf(farm.producerCpf)}
+                      CPF: {formatCpf(farm.producerCpf)}
                     </p>
                     
                     <div className="farm-info">

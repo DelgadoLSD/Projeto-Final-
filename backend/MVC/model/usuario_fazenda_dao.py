@@ -46,3 +46,13 @@ class UsuarioFazendaDAO:
             self.conn.commit()
         except IntegrityError:
             raise
+
+    def buscar_fazendas_do_usuario(self, cpf_usuario: str) -> list:
+        sql = """
+            SELECT f.id, f.ccir AS ccm, f.nome, f.latitude, f.longitude, f.ext_territorial AS area
+            FROM fazendas f
+            JOIN usuarios_fazendas uf ON uf.fazenda_id = f.id
+            WHERE uf.cpf_usuario = %s
+        """
+        self.cursor.execute(sql, (cpf_usuario,))
+        return self.cursor.fetchall()
