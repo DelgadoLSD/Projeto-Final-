@@ -11,6 +11,17 @@ export const styles = {
     overflowX: 'hidden'
   } as CSSProperties,
 
+    diagnosisBadge: (bg: string, color: string) => ({
+    display: 'inline-block',
+    padding: '0.3rem 0.6rem',
+    borderRadius: '8px',
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    backgroundColor: bg,
+    color: color,
+    marginTop: '0.5rem'
+  }) as CSSProperties,
+
   // Wrapper de conteúdo
   contentWrapper: {
     maxWidth: '1400px',
@@ -462,7 +473,128 @@ export const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     color: '#718096'
-  } as CSSProperties
+  } as CSSProperties,
+
+  // NOVOS ESTILOS
+  farmCard: {
+    background: '#ffffff',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    transition: 'all 0.2s ease-in-out',
+    // Não é possível usar '&:hover' diretamente em objetos CSSProperties.
+    // Para hover, você precisará aplicar em um evento mouseEnter/mouseLeave ou usar styled-components.
+    // O estilo de border condicional no onClick no componente já ajuda.
+  } as CSSProperties,
+
+  farmInfo: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    gap: '0.75rem',
+    marginTop: '0.5rem',
+    marginBottom: '1rem',
+  } as CSSProperties,
+
+  infoItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.9rem',
+    color: '#4a5568',
+  } as CSSProperties,
+
+  formGroup: {
+    marginBottom: '1.5rem',
+  } as CSSProperties,
+
+  formLabel: {
+    display: 'block',
+    marginBottom: '0.5rem',
+    fontWeight: '600',
+    color: '#4a5568',
+    fontSize: '0.9rem',
+  } as CSSProperties,
+
+  formInput: {
+    width: '100%',
+    padding: '0.75rem 1rem',
+    border: '1px solid #cbd5e0',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    color: '#2d3748',
+    backgroundColor: '#f7fafc',
+    transition: 'border-color 0.2s ease',
+    // Não é possível usar '&:focus' diretamente em objetos CSSProperties.
+    // Para focus, você precisará aplicar em um evento onFocus/onBlur no componente ou usar styled-components.
+  } as CSSProperties,
+
+  searchResults: {
+    marginTop: '1.5rem',
+    paddingTop: '1rem',
+    borderTop: '1px solid #e2e8f0',
+  } as CSSProperties,
+
+  searchResultsTitle: {
+    fontSize: '1.2rem',
+    color: '#2d3748',
+    marginBottom: '1rem',
+    fontWeight: '600',
+    textAlign: 'center',
+  } as CSSProperties,
+
+  modalActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    marginTop: '2rem',
+    gap: '1rem',
+  } as CSSProperties,
+
+  loadingSpinner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '16px',
+  } as CSSProperties,
+
+  spinner: {
+    border: '4px solid #f3f3f3',
+    borderTop: '4px solid #28a745',
+    borderRadius: '50%',
+    width: '40px',
+    height: '40px',
+    animation: 'spin 1s linear infinite',
+  } as CSSProperties,
+
+  // Novo estilo para exibir a fazenda selecionada
+  selectedFarmInfo: {
+    textAlign: 'center',
+    backgroundColor: '#e6ffe6', // Um verde claro para indicar seleção
+    padding: '1rem',
+    borderRadius: '12px',
+    marginBottom: '2rem',
+    border: '1px solid #28a745',
+  } as CSSProperties,
+
+  selectedFarmTitle: {
+    fontSize: '1rem',
+    color: '#155724',
+    marginBottom: '0.5rem',
+  } as CSSProperties,
+
+  selectedFarmName: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    color: '#28a745',
+  } as CSSProperties,
 }
 
 // Funções auxiliares para estilos dinâmicos
