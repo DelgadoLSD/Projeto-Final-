@@ -121,6 +121,12 @@ export function Producer() {
     setIsHeatMapModalOpen(false)
   }
 
+  const handleReportFarmSelect = (farmId: string) => {
+  // Redirecionar para página do relatório
+  navigate(`/relatorio/${farmId}`)
+  setIsReportModalOpen(false) // Fechar o modal de seleção de relatório
+}
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
@@ -415,7 +421,7 @@ export function Producer() {
                 {farms.map(farm => (
                   <FarmCard 
                     key={farm.id} 
-                    onClick={() => handleFarmSelect(farm.id)}
+                    onClick={() => handleReportFarmSelect(farm.id)}
                     style={{ margin: 0 }}
                   >
                     <h3>{farm.name}</h3>

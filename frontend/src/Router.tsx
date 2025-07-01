@@ -6,6 +6,7 @@ import { Producer } from './pages/Produtor'
 import Operator from './pages/Operador'
 import { Mosaiqueiro } from './pages/Mosaiqueiro'
 import { HeatMap } from './pages/Mapa_calor'
+import FarmReport from './pages/Relatorio'
 
 export function Router(){
     return(
@@ -20,6 +21,7 @@ export function Router(){
             <Route path="/cadastro-mosaiqueiro" element={<Mosaiqueiro />} />
             <Route path="/area-mosaiqueiro" element={<Mosaiqueiro />} />
             <Route path="/heat-map/:farmId" element={<HeatMap />} />
+            <Route path="/relatorio/:farmId" element={<FarmReport />} />
         </Routes>
     )
 }

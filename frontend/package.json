@@ -19,6 +19,7 @@
     "react-dom": "^19.1.0",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.6.2",
+    "recharts": "^3.0.2",
     "styled": "^1.0.0",
     "styled-components": "^6.1.19"
   },
