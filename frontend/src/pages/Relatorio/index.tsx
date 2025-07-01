@@ -103,7 +103,7 @@ export default function FarmReport() {
       { week: 'Sem 5', anomalias: 0, normal: 30, total: 30 }
     ],
     anomalyTypes: [
-      { name: 'Anômola', value: 45, color: '#ef4444' },
+      { name: 'Anômala', value: 45, color: '#ef4444' },
       { name: 'Normal', value: 10, color: '#22c55e' }
     ],
     monthlyTrend: [
