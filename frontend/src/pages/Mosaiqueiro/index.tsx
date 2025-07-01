@@ -326,10 +326,6 @@ export function Mosaiqueiro() {
                     </div>
                   </div>
                   
-                  <div className={`farm-status ${farm.status}`}>
-                    {getStatusIcon(farm.status)}
-                    {getStatusText(farm.status)}
-                  </div>
                 </FarmCard>
               ))}
             </FarmsGrid>
@@ -398,10 +394,6 @@ export function Mosaiqueiro() {
                       </div>
                     </div>
                     
-                    <div className={`farm-status ${farm.status}`}>
-                      {getStatusIcon(farm.status)}
-                      {getStatusText(farm.status)}
-                    </div>
                   </FarmCard>
                 ))}
               </SearchResults>

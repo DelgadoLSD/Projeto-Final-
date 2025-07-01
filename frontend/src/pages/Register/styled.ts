@@ -172,6 +172,7 @@ export const CheckButton = styled.button`
     width: 100%;
     height: 2.8rem;
     margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
     border: none;
     border-radius: 8px;
     background: linear-gradient(135deg, #28a745, #20c997);
@@ -198,5 +199,19 @@ export const CheckButton = styled.button`
 
     &:active {
         transform: translateY(0);
+    }
+`
+
+export const LoginLink = styled.span`
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    color: ${props => props.theme['verdeEscura1Agrineural']};
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.3s ease;
+
+    &:hover {
+        color: ${props => props.theme['verdeEscura2Agrineural']};
     }
 `

@@ -7,7 +7,8 @@ import {
   WelcomeMessage,
   BaseInput, 
   CheckButton,
-  SelectItem
+  SelectItem,
+  LoginLink
 } from './styled';
 import LogoAgrineural from '../../assets/Agrineural.png';
 import BackgroundImage from '../../assets/folhaMamao.jpg';
@@ -113,10 +114,9 @@ export function Register() {
         </form>
 
         <Link to="/login">
-          <p style={{ color: 'white', marginTop: '1rem' }}>
-            Já tem uma conta? Faça login
-          </p>
+          <LoginLink>Já tem uma conta? Faça login</LoginLink>
         </Link>
+
       </RegisterBox>
     </RegisterContainer>
   );
