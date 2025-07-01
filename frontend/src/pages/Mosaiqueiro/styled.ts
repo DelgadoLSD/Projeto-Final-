@@ -65,14 +65,14 @@ export const PageHeader = styled.div`
   
   h1 {
     font-size: clamp(2rem, 5vw, 3rem);
-    color: #1a202c;
+    color: #2d3748;
     margin-bottom: 0.5rem;
     font-weight: 700;
   }
   
   p {
     font-size: clamp(1rem, 2.5vw, 1.2rem);
-    color: #4a5568;
+    color: #718096;
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
@@ -196,12 +196,12 @@ export const FarmCard = styled.div`
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    border-color: #3182ce;
+    border-color: #28a745;
   }
   
   h3 {
     font-size: clamp(1.1rem, 2.2vw, 1.3rem);
-    color: #1a202c;
+    color: #2d3748;
     margin-bottom: 0.5rem;
     font-weight: 600;
   }
@@ -218,12 +218,12 @@ export const FarmCard = styled.div`
     align-items: center;
     gap: 0.5rem;
     font-size: clamp(0.9rem, 1.8vw, 1rem);
-    color: #4a5568;
+    color: #718096;
     
     svg {
       width: 16px;
       height: 16px;
-      color: #3182ce;
+      color: #28a745;
     }
   }
   
@@ -243,8 +243,8 @@ export const FarmCard = styled.div`
     }
     
     &.healthy {
-      background-color: #c6f6d5;
-      color: #22543d;
+      background-color: #d4edda;
+      color: #155724;
       
       svg {
         color: #38a169;
@@ -252,8 +252,8 @@ export const FarmCard = styled.div`
     }
     
     &.warning {
-      background-color: #fef5e7;
-      color: #c05621;
+      background-color: #fff3cd;
+      color: #856404;
       
       svg {
         color: #ed8936;
@@ -261,8 +261,8 @@ export const FarmCard = styled.div`
     }
     
     &.critical {
-      background-color: #fed7d7;
-      color: #c53030;
+      background-color: #f8d7da;
+      color: #721c24;
       
       svg {
         color: #e53e3e;
@@ -306,7 +306,7 @@ export const ModalContent = styled.div`
   
   h2 {
     font-size: clamp(1.5rem, 3vw, 1.8rem);
-    color: #1a202c;
+    color: #2d3748;
     margin-bottom: 1rem;
     text-align: center;
   }
@@ -328,7 +328,7 @@ export const FormGroup = styled.div`
   label {
     display: block;
     font-weight: 600;
-    color: #1a202c;
+    color: #2d3748;
     margin-bottom: 0.5rem;
     font-size: clamp(0.9rem, 2vw, 1rem);
   }
@@ -344,8 +344,8 @@ export const FormGroup = styled.div`
     
     &:focus {
       outline: none;
-      border-color: #3182ce;
-      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+      border-color: #28a745;
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
     }
   }
   
@@ -405,7 +405,7 @@ export const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
 export const EmptyState = styled.div`
   text-align: center;
   padding: 3rem 1rem;
-  color: #4a5568;
+  color: #718096;
   
   svg {
     width: 64px;
@@ -417,7 +417,7 @@ export const EmptyState = styled.div`
   h3 {
     font-size: clamp(1.2rem, 2.5vw, 1.5rem);
     margin-bottom: 0.5rem;
-    color: #2d3748;
+    color: #4a5568;
   }
   
   p {
@@ -438,7 +438,7 @@ export const LoadingSpinner = styled.div`
     width: 40px;
     height: 40px;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #3182ce;
+    border-top: 4px solid #28a745;
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
@@ -457,5 +457,63 @@ export const SearchResults = styled.div`
     color: #1a202c;
     margin-bottom: 1rem;
     font-weight: 600;
+  }
+`
+
+export const LogoutButton = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  
+  &:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  ${media.md} {
+    padding: 10px 14px;
+    font-size: 13px;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+  
+  ${media.sm} {
+    top: 15px;
+    left: 15px;
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 8px;
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
   }
 `

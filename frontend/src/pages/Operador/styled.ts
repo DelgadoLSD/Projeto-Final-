@@ -31,6 +31,27 @@ export const styles = {
     flex: 1
   } as CSSProperties,
 
+  // Botão de logout
+  logoutButton: {
+    position: 'absolute',
+    top: '20px',
+    left: '20px',
+    background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '12px 16px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    boxShadow: '0 4px 15px rgba(220, 53, 69, 0.3)',
+    transition: 'all 0.3s ease',
+    zIndex: 1000
+  } as CSSProperties,
+
   // Cabeçalho
   header: {
     textAlign: 'center',
@@ -642,5 +663,15 @@ export const hoverEffects = {
   },
   deleteButtonLeave: {
     backgroundColor: '#fed7d7'
+  },
+  logoutButtonHover: {
+    background: 'linear-gradient(135deg, #c82333 0%, #a71e2a 100%)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 25px rgba(220, 53, 69, 0.4)'
+  },
+  logoutButtonLeave: {
+    background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+    transform: 'translateY(0)',
+    boxShadow: '0 4px 15px rgba(220, 53, 69, 0.3)'
   }
 }

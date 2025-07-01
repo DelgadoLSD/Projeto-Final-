@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'
 import type { CSSProperties } from 'react';
 import {
   Upload,
@@ -18,7 +19,8 @@ import {
   TrendingUp,
   Leaf,
   Search,
-  Globe
+  Globe,
+  LogOut
 } from 'lucide-react';
 import { styles, getStatusColor, hoverEffects } from './styled';
 
@@ -53,6 +55,7 @@ interface Farm {
 }
 
 export default function Operator() {
+  const navigate = useNavigate()
   const [photos, setPhotos] = useState<PhotoUpload[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -117,6 +120,7 @@ export default function Operator() {
     setAssociatedFarms(mockFarms.slice(0, 1));
   }, []);
 
+
   const handleAssociateFarm = () => {
     setIsAssociateModalOpen(true);
   };
@@ -157,6 +161,15 @@ export default function Operator() {
       }
     }
     return { lat: undefined, long: undefined };
+  };
+
+  const handleLogout = () => {
+    // lógica de logout (limpar tokens, etc.)
+    // localStorage.removeItem('authToken')
+    // sessionStorage.clear()
+    
+    // Redirecionar para a tela de login
+    navigate('/login')
   };
 
   // Função agora processa um array de arquivos
@@ -746,6 +759,20 @@ export default function Operator() {
 
   return (
     <div style={styles.container}>
+      {/* Botão de Logout posicionado de forma absoluta */}
+      <button 
+        onClick={handleLogout}
+        style={styles.logoutButton}
+        onMouseEnter={(e) => {
+          Object.assign(e.currentTarget.style, hoverEffects.logoutButtonHover)
+        }}
+        onMouseLeave={(e) => {
+          Object.assign(e.currentTarget.style, hoverEffects.logoutButtonLeave)
+        }}
+      >
+        <LogOut style={{ width: '16px', height: '16px' }} />
+        Sair
+      </button>
       <div style={styles.contentWrapper}>
         <div style={styles.header}>
           <h1 style={styles.title}>

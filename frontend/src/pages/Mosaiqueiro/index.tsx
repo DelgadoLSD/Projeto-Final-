@@ -9,7 +9,8 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Search
+  Search,
+  LogOut
 } from 'lucide-react'
 import {
   MosaqueiroContainer,
@@ -26,7 +27,8 @@ import {
   Button,
   EmptyState,
   LoadingSpinner,
-  SearchResults
+  SearchResults,
+  LogoutButton
 } from './styled'
 
 interface Farm {
@@ -125,6 +127,15 @@ export function Mosaiqueiro() {
       producerCpf: '456.789.123-00'
     }
   ]
+  
+  const handleLogout = () => {
+    // lógica de logout (limpar tokens, etc.)
+    // localStorage.removeItem('authToken')
+    // sessionStorage.clear()
+    
+    // Redirecionar para a tela de login
+    navigate('/login')
+  }
 
   const handleAssociateFarm = () => {
     setIsAssociateModalOpen(true)
@@ -259,6 +270,10 @@ export function Mosaiqueiro() {
   return (
     <>
       <MosaqueiroContainer>
+        <LogoutButton onClick={handleLogout}>
+          <LogOut />
+          Sair
+        </LogoutButton>
         <ContentContainer>
           <PageHeader>
             <h1>Painel do Mosaiqueiro</h1>

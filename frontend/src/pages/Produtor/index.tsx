@@ -6,6 +6,7 @@ import {
   TrendingUp,
   Leaf,
   Map,
+  LogOut
 } from 'lucide-react'
 import {
   ProducerContainer,
@@ -21,7 +22,8 @@ import {
   ModalActions,
   Button,
   EmptyState,
-  LoadingSpinner
+  LoadingSpinner,
+  LogoutButton
 } from './styled'
 import { MapSelector } from '../../components/Map/MapSelector'
 
@@ -50,6 +52,14 @@ export function Producer() {
     area: '',
   })
 
+  const handleLogout = () => {
+    // lógica de logout (limpar tokens, etc.)
+    // localStorage.removeItem('authToken')
+    // sessionStorage.clear()
+    
+    // Redirecionar para a tela de login
+    navigate('/login')
+  }
 
   const handleAddFarm = () => {
     setIsAddModalOpen(true)
@@ -141,6 +151,10 @@ export function Producer() {
   return (
     <>
       <ProducerContainer>
+        <LogoutButton onClick={handleLogout}>
+          <LogOut />
+          Sair
+        </LogoutButton>
         <ContentContainer>
           <PageHeader>
             <h1>Painel do Produtor</h1>

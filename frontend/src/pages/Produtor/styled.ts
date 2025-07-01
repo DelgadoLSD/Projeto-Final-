@@ -238,16 +238,28 @@ export const FarmCard = styled.div`
     &.healthy {
       background-color: #d4edda;
       color: #155724;
+
+      svg {
+        color: #38a169;
+      }
     }
     
     &.warning {
       background-color: #fff3cd;
       color: #856404;
+
+      svg {
+        color: #ed8936;
+      }
     }
     
     &.critical {
       background-color: #f8d7da;
       color: #721c24;
+
+      svg {
+        color: #e53e3e;
+      }
     }
   }
   
@@ -427,5 +439,62 @@ export const LoadingSpinner = styled.div`
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+`
+export const LogoutButton = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  
+  &:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  ${media.md} {
+    padding: 10px 14px;
+    font-size: 13px;
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+  
+  ${media.sm} {
+    top: 15px;
+    left: 15px;
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 8px;
+    
+    svg {
+      width: 12px;
+      height: 12px;
+    }
   }
 `
