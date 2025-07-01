@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   ArrowLeft, 
   Download, 
@@ -71,7 +72,7 @@ const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6']
 
 export default function FarmReport() {
   const [farmId] = useState('1') // Mock farmId
-  
+  const navigate = useNavigate()
   const [farm, setFarm] = useState<Farm | null>(null)
   const [reportData, setReportData] = useState<ReportData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
