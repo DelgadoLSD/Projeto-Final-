@@ -6,9 +6,6 @@ import {
   TrendingUp,
   Leaf,
   Map,
-  AlertTriangle,
-  CheckCircle,
-  XCircle
 } from 'lucide-react'
 import {
   ProducerContainer,
@@ -36,8 +33,6 @@ interface Farm {
   latitude: string
   longitude: string
   area: number
-  status: 'healthy' | 'warning' | 'critical'
-  lastInspection: string
 }
 
 export function Producer() {
@@ -69,8 +64,8 @@ export function Producer() {
   }
 
   const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch('http://localhost:5000/area-produtor/fazendas', {
@@ -88,19 +83,7 @@ export function Producer() {
       const data = await response.json();
 
       if (data.status === 'success') {
-        setFarms(prev => [
-          ...prev,
-          {
-            id: data.id.toString(),
-            ccm: formData.ccm,
-            name: formData.name,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
-            area: parseFloat(formData.area),
-            status: 'healthy',
-            lastInspection: new Date().toISOString().split('T')[0]
-          }
-        ]);
+        await carregarFazendas();
         setFormData({ name: '', latitude: '', longitude: '', area: '', ccm: '' });
         setIsAddModalOpen(false);
       } else {
@@ -115,67 +98,43 @@ export function Producer() {
   };
 
 
+  // MODIFICAÇÃO: AQUI
   const handleFarmSelect = (farmId: string) => {
-    // Redirecionar para página do mapa de calor
-    navigate(`/heat-map/${farmId}`)
+    // Redirecionar para página do mapa de calor usando a ROTA ESPECÍFICA DO PRODUTOR
+    navigate(`/area-produtor/heat-map/${farmId}`) // Nova rota no frontend para o produtor
     setIsHeatMapModalOpen(false)
   }
 
   const handleReportFarmSelect = (farmId: string) => {
-  // Redirecionar para página do relatório
-  navigate(`/relatorio/${farmId}`)
-  setIsReportModalOpen(false) // Fechar o modal de seleção de relatório
-}
+    navigate(`/relatorio/${farmId}`)
+    setIsReportModalOpen(false)
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return <CheckCircle />
-      case 'warning':
-        return <AlertTriangle />
-      case 'critical':
-        return <XCircle />
-      default:
-        return <CheckCircle />
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return 'Saudável'
-      case 'warning':
-        return 'Atenção'
-      case 'critical':
-        return 'Crítico'
-      default:
-        return 'Saudável'
+  async function carregarFazendas() {
+    try {
+      const res = await fetch('http://localhost:5000/area-produtor/fazendas', {
+        method: 'GET',
+        credentials: 'include' 
+      })
+      const data = await res.json()
+      if (data.status === 'success') {
+        setFarms(data.fazendas)
+      } else {
+        console.error(data.message)
+        setFarms([]); 
+      }
+    } catch (error) {
+      console.error('Erro ao buscar fazendas:', error)
+      setFarms([]); 
     }
   }
 
   useEffect(() => {
-    async function carregarFazendas() {
-      try {
-        const res = await fetch('http://localhost:5000/area-produtor/fazendas', {
-          method: 'GET',
-          credentials: 'include'  // mantém a sessão do login
-        })
-        const data = await res.json()
-        if (data.status === 'success') {
-          setFarms(data.fazendas)
-        } else {
-          console.error(data.message)
-        }
-      } catch (error) {
-        console.error('Erro ao buscar fazendas:', error)
-      }
-    }
-
     carregarFazendas()
   }, [])
 
@@ -239,11 +198,6 @@ export function Producer() {
                       <span>{farm.area} hectares</span>
                     </div>
                     
-                  </div>
-                  
-                  <div className={`farm-status ${farm.status}`}>
-                    {getStatusIcon(farm.status)}
-                    {getStatusText(farm.status)}
                   </div>
                 </FarmCard>
               ))}
@@ -363,7 +317,7 @@ export function Producer() {
                 {farms.map(farm => (
                   <FarmCard 
                     key={farm.id} 
-                    onClick={() => handleFarmSelect(farm.id)}
+                    onClick={() => handleFarmSelect(farm.id)} // ESTE É O BOTÃO QUE REDIRECIONA
                     style={{ margin: 0 }}
                   >
                     <h3>{farm.name}</h3>
@@ -380,10 +334,6 @@ export function Producer() {
                         <TrendingUp />
                         <span>{farm.area} hectares</span>
                       </div>
-                    </div>
-                    <div className={`farm-status ${farm.status}`}>
-                      {getStatusIcon(farm.status)}
-                      {getStatusText(farm.status)}
                     </div>
                   </FarmCard>
                 ))}
@@ -438,10 +388,6 @@ export function Producer() {
                         <TrendingUp />
                         <span>{farm.area} hectares</span>
                       </div>
-                    </div>
-                    <div className={`farm-status ${farm.status}`}>
-                      {getStatusIcon(farm.status)}
-                      {getStatusText(farm.status)}
                     </div>
                   </FarmCard>
                 ))}

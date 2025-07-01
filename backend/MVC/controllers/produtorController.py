@@ -60,22 +60,63 @@ def listar_fazendas():
             WHERE cpf_produtor = %s
         """
         fazenda_dao.cursor.execute(sql, (cpf_produtor,))
-        resultados = fazenda_dao.cursor.fetchall()
+        resultados = fazenda_dao.cursor.fetchall() 
 
         fazendas = []
         for row in resultados:
             fazendas.append({
-                'id': str(row[0]),
-                'ccm': row[1],
-                'name': row[2],
-                'latitude': str(row[3]),
-                'longitude': str(row[4]),
-                'area': float(row[5]),
-                'status': 'healthy',  # você pode melhorar isso depois
-                'lastInspection': ''  # idem
+                'id': str(row['id']),
+                'ccm': row['ccir'],
+                'name': row['nome'],
+                'latitude': str(row['latitude']),
+                'longitude': str(row['longitude']),
+                'area': float(row['ext_territorial']),
             })
 
         return jsonify({'status': 'success', 'fazendas': fazendas}), 200
 
     except Exception as e:
+        print(f"Erro detalhado ao listar fazendas para produtor {cpf_produtor}: {e}") 
         return jsonify({'status': 'error', 'message': f'Erro ao listar fazendas: {e}'}), 500
+
+# ROTA ESPECÍFICA DO PRODUTOR PARA MAPA DE CALOR (PROBLEMÁTICA, pois o frontend do produtor não usava essa rota antes)
+@produtor_bp.route('/area-produtor/mapa-calor/<int:farm_id>', methods=['GET'])
+def get_mapa_calor_data_produtor(farm_id):
+    if 'cpf' not in session:
+        return jsonify({'status': 'error', 'message': 'Usuário não autenticado.'}), 401
+
+    cpf_produtor = session['cpf']
+
+    # BUSCA A FAZENDA E VERIFICA SE PERTENCE AO PRODUTOR LOGADO
+    fazenda_data = fazenda_dao.buscar_fazenda_por_id(farm_id)
+
+    if not fazenda_data:
+        return jsonify({'status': 'error', 'message': 'Fazenda não encontrada.'}), 404
+    
+    # VERIFICAÇÃO CHAVE: Confere se o cpf_produtor da fazenda é o mesmo do usuário logado
+    if fazenda_data['cpf_produtor'] != cpf_produtor:
+        return jsonify({'status': 'error', 'message': 'Acesso negado: Esta fazenda não pertence ao seu usuário.'}), 403 # 403 Forbidden
+
+    # Busca dados das imagens e resultados (mesmo método usado pelo mosaiqueiro)
+    imagens_data = fazenda_dao.buscar_imagens_e_resultados_por_fazenda(farm_id)
+
+    response_fazenda = {
+        'id': str(fazenda_data['id']),
+        'name': fazenda_data['nome'],
+        'ccm': fazenda_data['ccir'],
+        'latitude': str(fazenda_data['latitude']),
+        'longitude': str(fazenda_data['longitude']),
+        'area': float(fazenda_data['ext_territorial']),
+        'producerName': fazenda_data['producerName'], 
+        'producerCpf': fazenda_data['producerCpf']
+    }
+
+    processed_imagens_data = [
+        {**img, 'anomala': bool(img['anomala'])} for img in imagens_data
+    ]
+
+    return jsonify({
+        'status': 'success',
+        'farm': response_fazenda,
+        'images': processed_imagens_data
+    })

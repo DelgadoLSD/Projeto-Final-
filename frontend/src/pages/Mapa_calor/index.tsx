@@ -4,13 +4,8 @@ import {
   ArrowLeft, 
   Download, 
   RefreshCw,
-  Calendar,
   MapPin,
   TrendingUp,
-  Leaf,
-  AlertTriangle,
-  CheckCircle,
-  XCircle
 } from 'lucide-react'
 
 // Importar Leaflet via CDN no index.html
@@ -27,8 +22,6 @@ interface Farm {
   latitude: string
   longitude: string
   area: number
-  status: 'healthy' | 'warning' | 'critical'
-  lastInspection: string
   producerName: string
   producerCpf: string
 }
@@ -40,73 +33,73 @@ interface ImageData {
   anomala: boolean
 }
 
-const HeatMapContainer = `
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  width: 100%;
-  overflow-x: hidden;
-`
+// --- MODIFICAÇÃO: Transformar strings de estilo em objetos JavaScript ---
+const HeatMapContainer: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '100vh',
+  background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+  width: '100%',
+  overflowX: 'hidden',
+};
 
-const ContentContainer = `
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem;
-  flex: 1;
-`
+const ContentContainer: React.CSSProperties = {
+  maxWidth: '1400px',
+  width: '100%',
+  margin: '0 auto',
+  padding: '2rem',
+  flex: 1,
+};
 
-const PageHeader = `
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-`
+const PageHeader: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginBottom: '2rem',
+  flexWrap: 'wrap',
+  gap: '1rem',
+};
 
-const ActionsContainer = `
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-`
+const ActionsContainer: React.CSSProperties = {
+  display: 'flex',
+  gap: '1rem',
+  flexWrap: 'wrap',
+};
 
-const ActionButton = `
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #3182ce;
-  color: white;
-  
-  &:hover {
-    background: #2c5aa0;
-    transform: translateY(-1px);
-  }
-`
+const ActionButton: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  padding: '0.75rem 1.5rem',
+  border: 'none',
+  borderRadius: '8px',
+  fontSize: '1rem',
+  fontWeight: '600',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  background: '#3182ce',
+  color: 'white',
+  // Pseudo-classes como :hover não são diretamente suportadas em inline styles sem bibliotecas adicionais
+  // Para hover, você precisaria de CSS module, styled-components ou similar, ou manipular estado
+};
 
-const MapContainer = `
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 2rem;
-`
+const MapContainer: React.CSSProperties = {
+  background: 'white',
+  borderRadius: '12px',
+  padding: '1.5rem',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+  marginBottom: '2rem',
+};
 
-const FarmInfoCard = `
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 2rem;
-`
+const FarmInfoCard: React.CSSProperties = {
+  background: 'white',
+  borderRadius: '12px',
+  padding: '1.5rem',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+  marginBottom: '2rem',
+};
+// --- FIM DA MODIFICAÇÃO DE ESTILOS ---
+
 
 export function HeatMap() {
   const { farmId } = useParams<{ farmId: string }>()
@@ -115,157 +108,179 @@ export function HeatMap() {
   const mapInstance = useRef<any>(null)
   
   const [farm, setFarm] = useState<Farm | null>(null)
+  const [images, setImages] = useState<ImageData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Mock data baseado no seu HTML
-  const mockFarm: Farm = {
-    id: farmId || '1',
-    name: 'Fazenda Vista Verde',
-    ccm: '12345678',
-    latitude: '-20.7596',
-    longitude: '-42.8736',
-    area: 45.5,
-    status: 'warning',
-    lastInspection: '2024-06-15',
-    producerName: 'João Silva',
-    producerCpf: '123.456.789-00'
-  }
-
-  // Mock de dados de imagens para simular o heatmap
-  const mockImages: ImageData[] = [
-    { nome: 'IMG_001', lat: -20.7596, lng: -42.8736, anomala: true },
-    { nome: 'IMG_002', lat: -20.7598, lng: -42.8738, anomala: false },
-    { nome: 'IMG_003', lat: -20.7594, lng: -42.8734, anomala: true },
-    { nome: 'IMG_004', lat: -20.7600, lng: -42.8740, anomala: false },
-    { nome: 'IMG_005', lat: -20.7592, lng: -42.8732, anomala: true },
-    { nome: 'IMG_006', lat: -20.7602, lng: -42.8742, anomala: true },
-    { nome: 'IMG_007', lat: -20.7590, lng: -42.8730, anomala: false },
-    { nome: 'IMG_008', lat: -20.7604, lng: -42.8744, anomala: true },
-    { nome: 'IMG_009', lat: -20.7588, lng: -42.8728, anomala: false },
-    { nome: 'IMG_010', lat: -20.7606, lng: -42.8746, anomala: true },
-  ]
-
   useEffect(() => {
-    setFarm(mockFarm)
-    setIsLoading(false)
-  }, [farmId])
+    const fetchHeatmapData = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const response = await fetch(`http://localhost:5000/area-mosaiqueiro/mapa-calor/${farmId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        })
 
-  useEffect(() => {
-    if (!farm || !mapRef.current || !window.L) return
-
-    const centro = {
-      lat: parseFloat(farm.latitude),
-      lng: parseFloat(farm.longitude)
-    }
-    const raio_km = Math.sqrt(farm.area / Math.PI) // Aproximação do raio baseado na área
-    const raio_m = raio_km * 1000
-
-    // Limpa mapa anterior se existir
-    if (mapInstance.current) {
-      mapInstance.current.remove()
-    }
-
-    // 1) Cria o mapa e adiciona camada base
-    const mapa = window.L.map(mapRef.current).setView([centro.lat, centro.lng], 15)
-    
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(mapa)
-
-    // 2) Desenha o círculo verde da fazenda
-    window.L.circle([centro.lat, centro.lng], {
-      radius: raio_m,
-      color: 'green',
-      fillColor: 'lightgreen',
-      fillOpacity: 0.2
-    }).addTo(mapa)
-
-    // 3) Prepara dados para o heatmap: só anômalas, peso = 1
-    const heatData = mockImages
-      .filter(img => img.anomala)
-      .map(img => [img.lat, img.lng, 1])
-
-    // 4) Cria o heatmap (interpolação suave) - verifica se o plugin está disponível
-    if (window.L.heatLayer) {
-      window.L.heatLayer(heatData, {
-        radius: 25,   // alcance de cada ponto, em pixels
-        blur: 15,     // quanto mais, mais suave
-        maxZoom: 17,
-        gradient: {
-          0.3: 'green',
-          0.5: 'yellow',
-          0.7: 'orange',
-          1.0: 'red'
+        if (!response.ok) {
+          if (response.status === 401) {
+            navigate('/login')
+            return
+          }
+          const errorData = await response.json()
+          throw new Error(errorData.message || `Erro HTTP: ${response.status}`)
         }
-      }).addTo(mapa)
+
+        const data = await response.json()
+
+        if (data.status === 'success') {
+          setFarm(data.farm)
+          setImages(data.images)
+        } else {
+          throw new Error(data.message || 'Falha ao buscar dados do mapa de calor.')
+        }
+      } catch (err: any) {
+        setError(err.message)
+        console.error("Erro ao carregar dados do mapa de calor:", err)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    // 5) Adiciona marcadores para imagens normais
-    mockImages
-      .filter(img => !img.anomala)
-      .forEach(img => {
-        window.L.circleMarker([img.lat, img.lng], {
-          radius: 6,
-          fillColor: 'blue',
-          color: '#000',
-          weight: 1,
-          fillOpacity: 0.6
-        }).bindPopup(`${img.nome}<br><strong>Normal</strong>`)
-          .addTo(mapa)
-      })
+    if (farmId) {
+      fetchHeatmapData()
+    }
+  }, [farmId, navigate])
 
-    mapInstance.current = mapa
+  useEffect(() => {
+    if (!farm || !mapRef.current || !window.L) return 
 
-    return () => {
+    const initializeMap = () => {
+      if (!mapRef.current) return;
+
+      const centro = {
+        lat: parseFloat(farm.latitude),
+        lng: parseFloat(farm.longitude)
+      }
+      
+      if (isNaN(centro.lat) || isNaN(centro.lng)) {
+        console.error("Coordenadas inválidas recebidas da fazenda:", farm.latitude, farm.longitude);
+        setError("Coordenadas da fazenda são inválidas.");
+        return;
+      }
+
+      const raio_km = Math.sqrt(farm.area / Math.PI)
+      const raio_m = raio_km * 1000
+
       if (mapInstance.current) {
         mapInstance.current.remove()
       }
+
+      const mapa = window.L.map(mapRef.current).setView([centro.lat, centro.lng], 15)
+      
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(mapa)
+
+      window.L.circle([centro.lat, centro.lng], {
+        radius: raio_m,
+        color: 'green',
+        fillColor: 'lightgreen',
+        fillOpacity: 0.2
+      }).addTo(mapa)
+
+      if (images.length > 0) {
+        const heatData = images 
+          .filter(img => img.anomala)
+          .map(img => [img.lat, img.lng, 1])
+
+        if (window.L.heatLayer) {
+          window.L.heatLayer(heatData, {
+            radius: 25, 
+            blur: 15,
+            maxZoom: 17,
+            gradient: {
+              0.3: 'green',
+              0.5: 'yellow',
+              0.7: 'orange',
+              1.0: 'red'
+            }
+          }).addTo(mapa)
+        }
+
+        images
+          .filter(img => !img.anomala)
+          .forEach(img => {
+            window.L.circleMarker([img.lat, img.lng], {
+              radius: 6,
+              fillColor: 'blue',
+              color: '#000',
+              weight: 1,
+              fillOpacity: 0.6
+            }).bindPopup(`${img.nome}<br><strong>Normal</strong>`)
+              .addTo(mapa)
+          })
+      }
+
+      mapInstance.current = mapa
+      mapa.invalidateSize();
+    };
+
+    const timeoutId = setTimeout(initializeMap, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
     }
-  }, [farm])
+  }, [farm, images]) 
 
   const handleGoBack = () => {
-    // Verifica a origem e navega para a página correspondente
-  const previousPage = farm?.producerName ? '/area-produtor' : '/area-mosaiqueiro';
-  navigate(previousPage);
+    navigate('/area-mosaiqueiro/fazendas/associadas'); 
   }
 
   const handleRefresh = () => {
-    setIsLoading(true)
-    // Simula recarregamento dos dados
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+    if (farmId) {
+      const refreshData = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(`http://localhost:5000/area-mosaiqueiro/mapa-calor/${farmId}`, { 
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (data.status === 'success') {
+            setFarm(data.farm);
+            setImages(data.images);
+          } else {
+            throw new Error(data.message || 'Falha ao recarregar dados.');
+          }
+        } catch (err: any) {
+          setError(err.message);
+          console.error("Erro ao recarregar dados do mapa de calor:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      refreshData();
+    }
   }
 
   const handleDownload = () => {
     alert('Funcionalidade de download será implementada')
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return <CheckCircle style={{ color: '#38a169' }} />
-      case 'warning':
-        return <AlertTriangle style={{ color: '#ed8936' }} />
-      case 'critical':
-        return <XCircle style={{ color: '#e53e3e' }} />
-      default:
-        return <CheckCircle style={{ color: '#38a169' }} />
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return 'Saudável'
-      case 'warning':
-        return 'Atenção'
-      case 'critical':
-        return 'Crítico'
-      default:
-        return 'Saudável'
-    }
   }
 
   if (isLoading) {
@@ -287,18 +302,20 @@ export function HeatMap() {
   if (!farm) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div>Fazenda não encontrada</div>
+        <div>Fazenda não encontrada ou dados não carregados.</div>
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', width: '100%', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', padding: '2rem', flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+    // --- MODIFICAÇÃO: Aplicar estilos usando a prop 'style' com os objetos ---
+    <div style={HeatMapContainer}>
+      <div style={ContentContainer}>
+        <div style={PageHeader}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <button 
               onClick={handleGoBack}
+              // Ajuste o estilo do botão se ActionButton não for usado diretamente
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -327,9 +344,10 @@ export function HeatMap() {
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={ActionsContainer}>
             <button 
               onClick={handleRefresh}
+              // Ajuste o estilo do botão se ActionButton não for usado diretamente
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -350,6 +368,7 @@ export function HeatMap() {
             </button>
             <button 
               onClick={handleDownload}
+              // Ajuste o estilo do botão se ActionButton não for usado diretamente
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -372,7 +391,7 @@ export function HeatMap() {
         </div>
 
         {/* Informações da Fazenda */}
-        <div style={{ background: 'white', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)', marginBottom: '2rem' }}>
+        <div style={FarmInfoCard}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <MapPin size={20} style={{ color: '#3182ce' }} />
@@ -389,27 +408,11 @@ export function HeatMap() {
                 <div style={{ fontWeight: '600', color: '#000' }}>{farm.area} hectares</div>
               </div>
             </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Calendar size={20} style={{ color: '#3182ce' }} />
-              <div>
-                <div style={{ fontSize: '0.875rem', color: '#4a5568' }}>Última Inspeção</div>
-                <div style={{ fontWeight: '600', color: '#000' }}>{new Date(farm.lastInspection).toLocaleDateString('pt-BR')}</div>
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {getStatusIcon(farm.status)}
-              <div>
-                <div style={{ fontSize: '0.875rem', color: '#4a5568' }}>Status</div>
-                <div style={{ fontWeight: '600', color: '#000' }}>{getStatusText(farm.status)}</div>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* Container do Mapa */}
-        <div style={{ background: 'white', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
+        <div style={MapContainer}>
           <h3 style={{ margin: '0 0 1rem 0', color: '#1a202c' }}>Mapa de Calor das Anomalias</h3>
           <div 
             ref={mapRef}
