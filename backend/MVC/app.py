@@ -7,27 +7,30 @@ from MVC.controllers.mosaiqueiroController import mosaiqueiro_bp
 from MVC.controllers.uploadController import upload_bp
 from MVC.controllers.statusController import status_bp
 
-# Inicializa o framework e adiciona o direcionamento do UI
+# Inicializa o framework
 app = Flask(__name__,
             template_folder='./view/templates',
             static_folder='./view/static'
             )
-CORS(app, supports_credentials=True)
 
-# configurações
+# MODIFICAÇÃO: Configuração do CORS mais robusta e explícita
+# Substitua "http://localhost:5173" pela URL exata do seu frontend se for diferente
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+
+# Configurações da aplicação
 app.secret_key = 'chave_secreta_qualquer'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['STATUS_FOLDER'] = 'status'
 
-# direcionamento para cada funcionalidade do site
+# MODIFICAÇÃO: Direcionamento centralizado com url_prefix
 app.register_blueprint(auth_bp, url_prefix='/auth')
-app.register_blueprint(produtor_bp)
-app.register_blueprint(operador_bp)
-app.register_blueprint(mosaiqueiro_bp)
+app.register_blueprint(produtor_bp, url_prefix='/area-produtor')
+app.register_blueprint(operador_bp, url_prefix='/area-operador')
+app.register_blueprint(mosaiqueiro_bp, url_prefix='/area-mosaiqueiro')
 app.register_blueprint(upload_bp)
 app.register_blueprint(status_bp)
 
-# inicialização
+# Rota inicial
 @app.route('/')
 def index():
     return redirect('http://localhost:5173/')
