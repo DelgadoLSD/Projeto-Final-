@@ -1,342 +1,274 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom' 
 import { 
-  ArrowLeft, 
-  Download, 
-  Calendar,
-  MapPin,
-  TrendingUp,
-  TrendingDown,
-  Leaf,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  BarChart3,
-  PieChart,
-  Activity,
-  FileText,
-  Camera,
-  Zap
+    ArrowLeft, 
+    Download, 
+    MapPin,
+    TrendingUp,
+    AlertTriangle,
+    CheckCircle,
+    XCircle,
+    Activity,
+    Camera
 } from 'lucide-react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPieChart, Cell, BarChart, Bar, Pie } from 'recharts'
+import { ResponsiveContainer, PieChart as RechartsPieChart, Cell, Pie, Tooltip, Legend } from 'recharts'
 
 import { Container, MaxWidthWrapper, HeaderSection, HeaderTitleContainer, BackButton, ReportTitle, ReportSubtitle, DownloadButton, 
-  QuickStatsGrid, StatCard, StatContent, AnomalyStatValue, HealthStatValue, StatusIndicator, FarmInfoSection, FarmInfoTitle, FarmInfoGrid, FarmInfoItem,
-  TabsSection, TabNav, TabButton, TabContent, TwoColumnGrid, ChartContainer, ThreeColumnGrid, AnomalyTypeCard, AnomalyTypeColorIndicator,
-  RecommendationCard, RecommendationHeader, PriorityTag, RecommendationDescription, ActionRecommendedBox, StyledIcon
- } from './styled'
-
+    QuickStatsGrid, StatCard, StatContent, AnomalyStatValue, StatusIndicator, FarmInfoSection, FarmInfoTitle, FarmInfoGrid, FarmInfoItem,
+    ChartContainer, // ChartContainer ainda é necessário para o gráfico de pizza
+    StyledIcon
+   } from './styled' 
 
 interface Farm {
-  id: string
-  name: string
-  ccm: string
-  latitude: string
-  longitude: string
-  area: number
-  status: 'healthy' | 'warning' | 'critical'
-  lastInspection: string
-  producerName: string
-  producerCpf: string
-  totalImages: number
-  anomalousImages: number
-  normalImages: number
+    id: string
+    name: string
+    ccm: string
+    latitude: string
+    longitude: string
+    area: number
+    status: 'healthy' | 'warning' | 'critical'
+    producerName: string
+    producerCpf: string
+    totalImages: number
+    anomalousImages: number
+    normalImages: number
 }
 
 interface ReportData {
-  weeklyAnalysis: Array<{
-    week: string
-    anomalias: number
-    normal: number
-    total: number
-  }>
-  anomalyTypes: Array<{
-    name: string
-    value: number
-    color: string
-  }>
-  monthlyTrend: Array<{
-    month: string
-    anomalias: number
-    eficiencia: number
-  }>
-  recommendations: Array<{
-    priority: 'high' | 'medium' | 'low'
-    title: string
-    description: string
-    action: string
-  }>
+    anomalyTypes: Array<{
+        name: string
+        value: number
+        color: string
+    }>
 }
 
-const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6']
+// COLORS pode ser removido se as cores vêm totalmente do backend, mas não causa problema se ficar
+const COLORS = ['#ef4444', '#22c55e'] 
 
 export default function FarmReport() {
-  const [farmId] = useState('1') // Mock farmId
-  const navigate = useNavigate()
-  const [farm, setFarm] = useState<Farm | null>(null)
-  const [reportData, setReportData] = useState<ReportData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'analysis' | 'recommendations'>('overview')
+    const { farmId } = useParams<{ farmId: string }>()
+    const navigate = useNavigate()
+    const [farm, setFarm] = useState<Farm | null>(null)
+    const [reportData, setReportData] = useState<ReportData | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
-  // Mock data
-  const mockFarm: Farm = {
-    id: farmId || '1',
-    name: 'Fazenda Vista Verde',
-    ccm: '12345678',
-    latitude: '-20.7596',
-    longitude: '-42.8736',
-    area: 45.5,
-    status: 'warning',
-    lastInspection: '2024-06-15',
-    producerName: 'João Silva',
-    producerCpf: '123.456.789-00',
-    totalImages: 150,
-    anomalousImages: 32,
-    normalImages: 118
-  }
+    useEffect(() => {
+        const fetchFarmReport = async () => {
+            setIsLoading(true)
+            setError(null)
+            try {
+                if (!farmId) {
+                    setError("ID da fazenda não fornecido.");
+                    setIsLoading(false);
+                    return;
+                }
 
-  const mockReportData: ReportData = {
-    weeklyAnalysis: [
-      { week: 'Sem 1', anomalias: 8, normal: 22, total: 30 },
-      { week: 'Sem 2', anomalias: 12, normal: 18, total: 30 },
-      { week: 'Sem 3', anomalias: 6, normal: 24, total: 30 },
-      { week: 'Sem 4', anomalias: 6, normal: 24, total: 30 },
-      { week: 'Sem 5', anomalias: 0, normal: 30, total: 30 }
-    ],
-    anomalyTypes: [
-      { name: 'Anômala', value: 45, color: '#ef4444' },
-      { name: 'Normal', value: 10, color: '#22c55e' }
-    ],
-    monthlyTrend: [
-      { month: 'Jan', anomalias: 15, eficiencia: 85 },
-      { month: 'Fev', anomalias: 22, eficiencia: 78 },
-      { month: 'Mar', anomalias: 18, eficiencia: 82 },
-      { month: 'Abr', anomalias: 12, eficiencia: 88 },
-      { month: 'Mai', anomalias: 8, eficiencia: 92 },
-      { month: 'Jun', anomalias: 32, eficiencia: 68 }
-    ],
-    recommendations: [
-      {
-        priority: 'high',
-        title: 'Controle de Pragas Urgente',
-        description: 'Detectado aumento significativo de pragas na região sudeste da propriedade.',
-        action: 'Aplicar inseticida específico nas coordenadas identificadas no prazo de 48h.'
-      },
-      {
-        priority: 'medium',
-        title: 'Monitoramento Nutricional',
-        description: 'Sinais de deficiência nutricional em 20% das áreas analisadas.',
-        action: 'Realizar análise de solo e ajustar programa de adubação.'
-      },
-      {
-        priority: 'low',
-        title: 'Otimização de Irrigação',
-        description: 'Oportunidade de melhoria na distribuição de água.',
-        action: 'Revisar sistema de irrigação para melhor uniformidade.'
-      }
-    ]
-  }
+                const response = await fetch(`http://localhost:5000/area-produtor/relatorio/${farmId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                })
 
-  useEffect(() => {
-    setFarm(mockFarm)
-    setReportData(mockReportData)
-    setIsLoading(false)
-  }, [farmId])
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        navigate('/login')
+                        return
+                    }
+                    const errorData = await response.json()
+                    throw new Error(errorData.message || `Erro HTTP: ${response.status}`)
+                }
 
-  const handleGoBack = () => {
-    navigate('/area-produtor') // Volta para a página anterior
-  }
+                const data = await response.json()
 
-  const handleDownloadReport = () => {
-    alert('Relatório será gerado em PDF e baixado automaticamente')
-  }
+                if (data.status === 'success') {
+                    setFarm(data.farm)
+                    setReportData(data.reportData)
+                } else {
+                    throw new Error(data.message || 'Falha ao buscar dados do relatório.')
+                }
+            } catch (err: any) {
+                setError(err.message)
+                console.error("Erro ao carregar dados do relatório:", err)
+            } finally {
+                setIsLoading(false)
+            }
+        }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return <StyledIcon as={CheckCircle} iconColor="#00FF00" />
-      case 'warning':
-        return <StyledIcon as={AlertTriangle} iconColor="#f59e0b" />
-      case 'critical':
-        return <StyledIcon as={XCircle} iconColor="#FF0000" />
-      default:
-        return <StyledIcon as={CheckCircle} iconColor="#00FF00" />
+        fetchFarmReport()
+    }, [farmId, navigate])
+
+    const handleGoBack = () => {
+        navigate('/area-produtor')
     }
-  }
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'healthy': return 'Saudável'
-      case 'warning': return 'Atenção'
-      case 'critical': return 'Crítico'
-      default: return 'Saudável'
+    const handleDownloadReport = () => {
+        alert('Funcionalidade de download será implementada')
     }
-  }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+    const getStatusIcon = (status: string) => {
+        switch (status) {
+            case 'healthy':
+                return <StyledIcon as={CheckCircle} iconColor="#22c55e" />
+            case 'warning':
+                return <StyledIcon as={AlertTriangle} iconColor="#f59e0b" />
+            case 'critical':
+                return <StyledIcon as={XCircle} iconColor="#ef4444" />
+            default:
+                return <StyledIcon as={CheckCircle} iconColor="#22c55e" />
+        }
     }
-  }
 
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'Alta'
-      case 'medium': return 'Média'
-      case 'low': return 'Baixa'
-      default: return 'Baixa'
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'healthy': return 'Saudável'
+            case 'warning': return 'Atenção'
+            case 'critical': return 'Crítico'
+            default: return 'Saudável'
+        }
     }
-  }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Carregando relatório...</div>
-      </div>
-    )
-  }
-
-  if (!farm || !reportData) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Dados não encontrados</div>
-      </div>
-    )
-  }
-
-  const anomalyPercentage = ((farm.anomalousImages / farm.totalImages) * 100).toFixed(1)
-  const healthScore = (100 - parseFloat(anomalyPercentage)).toFixed(0)
-
-  return (
-    <Container> {/* Substitui a div principal */}
-      <MaxWidthWrapper> {/* Substitui max-w-7xl mx-auto */}
-        {/* Header */}
-        <HeaderSection> {/* Substitui bg-white rounded-2xl shadow-lg p-6 mb-6 */}
-          <HeaderTitleContainer> {/* Substitui flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 */}
-            <BackButton onClick={handleGoBack}> {/* Substitui button */}
-              <ArrowLeft size={20} />
-              Voltar
-            </BackButton>
-            <div>
-              <ReportTitle> {/* Substitui h1 */}
-                Relatório - {farm.name}
-              </ReportTitle>
-              <ReportSubtitle> {/* Substitui p */}
-                Análise detalhada da propriedade rural
-              </ReportSubtitle>
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-lg">Carregando relatório...</div>
             </div>
-          </HeaderTitleContainer>
+        )
+    }
 
-          <DownloadButton onClick={handleDownloadReport}> {/* Substitui button */}
-            <Download size={20} />
-            Baixar Relatório
-          </DownloadButton>
-        </HeaderSection>
+    if (error) {
+        return (
+            <div className="flex justify-center items-center min-h-screen text-red-600">
+                <div className="text-lg">Erro ao carregar relatório: {error}</div>
+            </div>
+        )
+    }
 
-        {/* Quick Stats */}
-        <QuickStatsGrid> {/* Substitui grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 */}
-          <StatCard> {/* Substitui bg-white rounded-xl shadow-lg p-6 */}
-            <StatContent> {/* Substitui div */}
-              <p>Imagens Analisadas</p>
-              <p>{farm.totalImages}</p>
-            </StatContent>
-            <StyledIcon as={Camera} iconColor="#000" />
-          </StatCard>
+    if (!farm || !reportData) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-lg">Dados da fazenda ou relatório não encontrados.</div>
+            </div>
+        )
+    }
 
-          <StatCard>
-            <AnomalyStatValue> {/* Usa o styled component específico para anomalias */}
-              <p>Anomalias Detectadas</p>
-              <p>{farm.anomalousImages}</p>
-              <p>{anomalyPercentage}% do total</p>
-            </AnomalyStatValue>
-            <StyledIcon as={AlertTriangle} iconColor="#f59e0b" /> {/* Cor laranja (orange-500) */}
-          </StatCard>
+    const anomalyPercentage = ((farm.anomalousImages / farm.totalImages) * 100).toFixed(1)
+    
+    // Verificação para garantir que anomalyTypes tem dados para o gráfico de pizza
+    const hasPieChartData = reportData.anomalyTypes && reportData.anomalyTypes.length > 0;
 
-          <StatCard>
-            <StatContent>
-              <p>Status Geral</p>
-              <StatusIndicator> {/* Substitui div flex items-center gap-2 mt-2 */}
-                {getStatusIcon(farm.status)}
-                <span>{getStatusText(farm.status)}</span>
-              </StatusIndicator>
-            </StatContent>
-            <StyledIcon as={Activity} iconColor="#000" />
-          </StatCard>
-        </QuickStatsGrid>
+    return (
+        <Container>
+            <MaxWidthWrapper>
+                {/* Header */}
+                <HeaderSection>
+                    <HeaderTitleContainer>
+                        <BackButton onClick={handleGoBack}>
+                            <ArrowLeft size={20} />
+                            Voltar
+                        </BackButton>
+                        <div>
+                            <ReportTitle>
+                                Relatório - {farm.name}
+                            </ReportTitle>
+                            <ReportSubtitle>
+                                Análise detalhada da propriedade rural
+                            </ReportSubtitle>
+                        </div>
+                    </HeaderTitleContainer>
 
-        {/* Farm Info */}
-        <FarmInfoSection> {/* Reutiliza HeaderSection base */}
-          <FarmInfoTitle>Informações da Propriedade</FarmInfoTitle>
-          <FarmInfoGrid>
-            <FarmInfoItem>
-              <MapPin className="w-5 h-5 text-blue-500 " />
-              <div>
-                <p>Coordenadas</p>
-                <p>{farm.latitude}, {farm.longitude}</p>
-              </div>
-            </FarmInfoItem>
-            <FarmInfoItem>
-              <TrendingUp className="w-5 h-5 text-blue-500" />
-              <div>
-                <p>Área Total</p>
-                <p>{farm.area} hectares</p>
-              </div>
-            </FarmInfoItem>
-          </FarmInfoGrid>
-        </FarmInfoSection>
+                    <DownloadButton onClick={handleDownloadReport}>
+                        <Download size={20} />
+                        Baixar Relatório
+                    </DownloadButton>
+                </HeaderSection>
 
-        {/* Tabs */}
-        <TabsSection> {/* Reutiliza HeaderSection base */}
-          <TabNav>
-            {[
-              { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
-            ].map((tab) => (
-              <TabButton
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                $isActive={activeTab === tab.id} // Propriedade para controle de estilo
-              >
-                <tab.icon size={18} />
-                {tab.label}
-              </TabButton>
-            ))}
-          </TabNav>
+                {/* Quick Stats */}
+                <QuickStatsGrid>
+                    <StatCard>
+                        <StatContent>
+                            <p>Imagens Analisadas</p>
+                            <p>{farm.totalImages}</p>
+                        </StatContent>
+                        <StyledIcon as={Camera} iconColor="#000" />
+                    </StatCard>
 
-          <TabContent>
-            {activeTab === 'overview' && (
-              <div className="space-y-6"> {/* Manter space-y-6 ou criar um styled */}
-                <TwoColumnGrid> {/* Substitui grid grid-cols-1 lg:grid-cols-2 gap-6 */}
+                    <StatCard>
+                        <AnomalyStatValue>
+                            <p>Anomalias Detectadas</p>
+                            <p>{farm.anomalousImages}</p>
+                            <p>{anomalyPercentage}% do total</p>
+                        </AnomalyStatValue>
+                        <StyledIcon as={AlertTriangle} iconColor="#f59e0b" />
+                    </StatCard>
 
-                  <ChartContainer>
-                    <h3>Distribuição de Anomalias</h3>
-                    <ResponsiveContainer width={400} height={400}>
-                      <RechartsPieChart margin={{ top: 20, right: 50, bottom: 20, left: 50 }}>
-                        <Pie
-                          data={reportData.anomalyTypes}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={100}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {reportData.anomalyTypes.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </RechartsPieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </TwoColumnGrid>
-              </div>
-            )}
-          </TabContent>
-        </TabsSection>
-      </MaxWidthWrapper>
-    </Container>
-  )
+                    <StatCard>
+                        <StatContent>
+                            <p>Status Geral</p>
+                            <StatusIndicator>
+                                {getStatusIcon(farm.status)}
+                                <span>{getStatusText(farm.status)}</span>
+                            </StatusIndicator>
+                        </StatContent>
+                        <StyledIcon as={Activity} iconColor="#000" />
+                    </StatCard>
+                </QuickStatsGrid>
+
+                {/* Farm Info */}
+                <FarmInfoSection>
+                    <FarmInfoTitle>Informações da Propriedade</FarmInfoTitle>
+                    <FarmInfoGrid>
+                        <FarmInfoItem>
+                            <MapPin className="w-5 h-5 text-blue-500 " />
+                            <div>
+                                <p>Coordenadas</p>
+                                <p>{farm.latitude}, {farm.longitude}</p>
+                            </div>
+                        </FarmInfoItem>
+                        <FarmInfoItem>
+                            <TrendingUp className="w-5 h-5 text-blue-500" />
+                            <div>
+                                <p>Área Total</p>
+                                <p>{farm.area} hectares</p>
+                            </div>
+                        </FarmInfoItem>
+                    </FarmInfoGrid>
+                </FarmInfoSection>
+
+                {/* Gráfico de Pizza direto, sem abas */}
+                <ChartContainer>
+                    {/* Removido o título "Distribuição de Anomalias (Total)" */}
+                    {hasPieChartData ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                            <RechartsPieChart margin={{ top: 20, right: 0, bottom: 20, left: 0 }}>
+                                <Pie
+                                    data={reportData.anomalyTypes}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={100}
+                                    fill="#8884d8" 
+                                    dataKey="value"
+                                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                                >
+                                    {reportData.anomalyTypes.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                                <Legend />
+                            </RechartsPieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <p style={{ textAlign: 'center', marginTop: '2rem', color: '#6b7280' }}>
+                            Nenhum dado disponível para a distribuição de anomalias.
+                            <br/>Certifique-se de que há imagens processadas para esta fazenda.
+                        </p>
+                    )}
+                </ChartContainer>
+
+            </MaxWidthWrapper>
+        </Container>
+    )
 }
