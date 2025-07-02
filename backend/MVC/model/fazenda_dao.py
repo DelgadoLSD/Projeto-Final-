@@ -70,3 +70,15 @@ class FazendaDAO:
         """
         self.cursor.execute(sql, (fazenda_id,))
         return self.cursor.fetchall()
+    
+    def buscar_fazendas_por_produtor(self, cpf_produtor: str):
+        """
+        Busca todas as fazendas de um produtor específico.
+        """
+        sql = """
+            SELECT id, ccir, nome, latitude, longitude, ext_territorial
+            FROM fazendas
+            WHERE cpf_produtor = %s
+        """
+        self.cursor.execute(sql, (cpf_produtor,))
+        return self.cursor.fetchall()
