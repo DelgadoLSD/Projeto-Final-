@@ -20,6 +20,7 @@ export function Register() {
   const [tipo, setTipo] = useState('');
   const navigate = useNavigate();
 
+  // --- FUNÇÃO handleSubmit ATUALIZADA ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -45,24 +46,22 @@ export function Register() {
 
       const data = await response.json();
 
-      if (data.status === 'success') {
-        switch (tipo) {
-          case 'produtor':
-            navigate('/cadastro-produtor');
-            break;
-          case 'operador':
-            navigate('/cadastro-operador');
-            break;
-          case 'mosaiqueiro':
-            navigate('/cadastro-mosaiqueiro');
-            break;
-        }
+      // Verificamos se a resposta do servidor foi bem-sucedida (status 2xx)
+      // e se o status no corpo do JSON é 'success'.
+      if (response.ok && data.status === 'success') {
+        alert('Cadastro realizado com sucesso! Você será redirecionado para a página de login.');
+        
+        // --- MUDANÇA PRINCIPAL AQUI ---
+        // Redireciona para a página de login, independentemente do tipo de usuário.
+        navigate('/login');
+        
       } else {
-        alert(data.message || 'Erro ao cadastrar.');
+        // Mostra a mensagem de erro vinda do backend, ou uma mensagem padrão.
+        alert(data.message || 'Erro ao realizar o cadastro.');
       }
     } catch (error) {
-      console.error('Erro ao cadastrar:', error);
-      alert('Erro de conexão com o servidor.');
+      console.error('Erro de conexão ou ao processar a requisição:', error);
+      alert('Não foi possível conectar ao servidor. Tente novamente mais tarde.');
     }
   };
 
