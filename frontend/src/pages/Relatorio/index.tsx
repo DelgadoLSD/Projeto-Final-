@@ -11,7 +11,7 @@ import {
     Activity,
     Camera
 } from 'lucide-react'
-import { ResponsiveContainer, PieChart as RechartsPieChart, Cell, Pie, Tooltip, Legend } from 'recharts'
+import { ResponsiveContainer, PieChart as RechartsPieChart, Cell, Pie, Tooltip } from 'recharts' // Removido Legend do import
 
 import { Container, MaxWidthWrapper, HeaderSection, HeaderTitleContainer, BackButton, ReportTitle, ReportSubtitle, DownloadButton, 
     QuickStatsGrid, StatCard, StatContent, AnomalyStatValue, StatusIndicator, FarmInfoSection, FarmInfoTitle, FarmInfoGrid, FarmInfoItem,
@@ -257,7 +257,8 @@ export default function FarmReport() {
                                     ))}
                                 </Pie>
                                 <Tooltip />
-                                <Legend />
+                                {/* Removido o componente Legend */}
+                                {/* <Legend /> */} 
                             </RechartsPieChart>
                         </ResponsiveContainer>
                     ) : (
